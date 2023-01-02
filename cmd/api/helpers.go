@@ -9,9 +9,9 @@ import (
 )
 
 type envelope struct {
-	Id         string         `json:"id"`
-	TypeData   string         `json:"type"`
-	Attributes map[string]any `json:"attributes"`
+	Id         int64  `json:"id,omitempty,string"`
+	TypeData   string `json:"type"`
+	Attributes any    `json:"attributes"`
 }
 
 type envelopeData struct {
