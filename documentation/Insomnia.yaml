@@ -1,0 +1,323 @@
+_type: export
+__export_format: 4
+__export_date: 2023-01-02T08:48:56.250Z
+__export_source: insomnia.desktop.app:v2022.4.2
+resources:
+  - _id: req_18b2d3de6a0d489db7895b5465d21d21
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1672649020994
+    created: 1672648901307
+    url: "{{ _.URL }}items"
+    name: Create new item
+    description: Create new item
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "items",
+            "attributes": {
+              "name": "Ember Hamster",
+              "description": "http://example.com/images/productivity.png"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_6cae684151164c0b8594df788112d53f
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_3c9f5fc359e549468e908cf36efdcc3a
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672648901307
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672648793301
+    created: 1672648793301
+    name: Items
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672648793301
+    _type: request_group
+  - _id: wrk_074fff2091894028b24cd3a631beb9fa
+    parentId: null
+    modified: 1672645019681
+    created: 1672645019681
+    name: Easy List
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_744cc286181947d3a84689afa98156ae
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1672648859199
+    created: 1672648797363
+    url: "{{ _.URL }}lists/1/items"
+    name: Get All Items
+    description: Getting all items from specific list
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_b5375585c22442e4ad644b0c01455729
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_69d7230b38b0485ba9c4d9267a1719c4
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672648797363
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_ba478905ec2c40019de5569ff733584d
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1672649024250
+    created: 1672648687024
+    url: "{{ _.URL }}lists"
+    name: Create new list
+    description: Create a new list
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "lists",
+            "attributes": {
+              "name": "Ember Hamster",
+              "icon": "fa-list",
+        			"folder_id": 1
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_0fc3b559f9834d0f9ba608f583e11681
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_93f11561471447f88332185af8654826
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672648687024
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_bb5b42a018f7412fae85e39452655f0b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672648583913
+    created: 1672648583913
+    name: Lists
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672648583913
+    _type: request_group
+  - _id: req_f77d688c59f84db7a7e184a24fd4f1da
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1672648668454
+    created: 1672648590768
+    url: "{{ _.URL }}folders/1/lists"
+    name: Get Lists
+    description: Show all lists from specific folder
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_f36a4930c2e5442f97f3ba08587ad280
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_7eecaa59594f4fce845ec5c3342305aa
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672648590768
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_f15cc6d39d5945a7aa39d3010e36600b
+    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
+    modified: 1672648608410
+    created: 1672648160352
+    url: "{{ _.URL }}folders"
+    name: Create New Folder
+    description: Create a new folder
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "folders",
+            "attributes": {
+              "name": "Ember Hamster",
+              "icon": "fa-folder"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_64168c78d2cc4b01b090cec803679534
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_69878ba3cfc94823877a4b050dfe6315
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672648160352
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_ee3b3f669af141b5b2c8377be2d17f94
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672647911898
+    created: 1672647911898
+    name: Folders
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672647911898
+    _type: request_group
+  - _id: req_fd86a0c9e0aa49ddad807e9d788a2af4
+    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
+    modified: 1672649189716
+    created: 1672647917161
+    url: "{{ _.URL }}folders"
+    name: Get All Folders
+    description: Show details of all folders
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_cb351051756f4e778e2baebd067b3d8b
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_883e7c974c0d40d6b93b9aeb042c8a7c
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672647917161
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_00c2bf62cd5c4c7eaa3dbef39615ed90
+    parentId: fld_8702d6560c614c28a361dd04f5e56bfb
+    modified: 1672648091428
+    created: 1672645033158
+    url: "{{ _.URL }}healthcheck"
+    name: Health Check
+    description: >-
+      Show application information.
+
+
+      This endpoint will return some basic information about our API, including its current version number and operating environment (developing, staging, production, ent.).
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_c539913958ec4a0696470d6829cf79d2
+        name: Accept
+        value: application/vnd.api+json.
+        description: ""
+      - id: pair_ee323806fac7434abfc908a9e5850d8e
+        name: Content-Type
+        value: application/vnd.api+json.
+        description: ""
+    authentication: {}
+    metaSortKey: -1672645033158
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_8702d6560c614c28a361dd04f5e56bfb
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672645030605
+    created: 1672645030605
+    name: Support
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672645030605
+    _type: request_group
+  - _id: env_92ba6d65fed7fc77b239199e8dafacab6ca5ea23
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672645106448
+    created: 1672645019687
+    name: Base Environment
+    data:
+      URL: http://localhost:4000/api/v1/
+    dataPropertyOrder:
+      "&":
+        - URL
+    color: null
+    isPrivate: false
+    metaSortKey: 1672645019687
+    _type: environment
+  - _id: jar_92ba6d65fed7fc77b239199e8dafacab6ca5ea23
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672645019688
+    created: 1672645019688
+    name: Default Jar
+    cookies: []
+    _type: cookie_jar
+  - _id: spc_492bfbadf42a47a29f01b8d34338db4b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672645019684
+    created: 1672645019684
+    fileName: Easy List
+    contents: ""
+    contentType: yaml
+    _type: api_spec

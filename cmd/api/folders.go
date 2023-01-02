@@ -12,5 +12,8 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 
 func (app *application) showFoldersHandler(w http.ResponseWriter, r *http.Request) {
 	_ = httprouter.ParamsFromContext(r.Context())
-	fmt.Println(w, "showing all folders")
+	_, err := fmt.Fprintf(w, "showing all folders")
+	if err != nil {
+		panic(err)
+	}
 }
