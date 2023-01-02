@@ -11,6 +11,9 @@ func (app *application) routes() *httprouter.Router {
 	router.NotFound = http.HandlerFunc(app.notFoundResponse)
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
+	router.HandlerFunc(http.MethodGet, "/", home)
+	router.ServeFiles("/static/*filepath", http.Dir("ui/static"))
+
 	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", app.healthCheckHandler)
 	router.HandlerFunc(http.MethodGet, "/api/v1/folders", app.showFoldersHandler)
 	router.HandlerFunc(http.MethodPost, "/api/v1/folders", app.createFolderHandler)
