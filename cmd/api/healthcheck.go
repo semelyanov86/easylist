@@ -1,18 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
 func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(w, "status: available")
-	_, err := fmt.Fprintf(w, "environment: %s\n", app.config.env)
-	if err != nil {
-		return
+	var env = envelope{
+		Id:       "1",
+		TypeData: "healthCheck",
+		Attributes: map[string]any{
+			"environment": app.config.env,
+			"version":     version,
+		},
 	}
-	_, err2 := fmt.Fprintf(w, "version: %s\n", version)
-	if err2 != nil {
-		return
+
+	var err = app.writeJSON(w, http.StatusOK, env, nil)
+
+	if err != nil {
+		app.logger.Println(err)
+		http.Error(w, "There is a problem in decoding data", http.StatusInternalServerError)
 	}
 }
