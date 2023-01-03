@@ -2,13 +2,57 @@ package main
 
 import (
 	"easylist/internal/data"
+	"easylist/internal/validator"
 	"fmt"
 	"net/http"
 	"time"
 )
 
 func (app *application) createListsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(w, "create a new list")
+	type attributes struct {
+		Name     string `json:"name"`
+		Icon     string `json:"icon"`
+		FolderId int64  `json:"folder_id"`
+		Order    int32  `json:"order"`
+	}
+
+	type inputAttributes struct {
+		Type       string     `json:"type"`
+		Attributes attributes `json:"attributes"`
+	}
+	var input struct {
+		Data inputAttributes
+	}
+
+	var err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, "createListHandler", err)
+		return
+	}
+	var v = validator.New()
+	v.Check(input.Data.Type == "lists", "data.type", "Wrong type provided, accepted type is lists")
+
+	var list = &data.List{
+		ID:        1,
+		UserId:    1,
+		FolderId:  input.Data.Attributes.FolderId,
+		Name:      input.Data.Attributes.Name,
+		Icon:      input.Data.Attributes.Icon,
+		Link:      "",
+		Order:     input.Data.Attributes.Order,
+		Version:   1,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+	}
+	if data.ValidateList(v, list); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	_, err = fmt.Fprintf(w, "%+v\n", input)
+	if err != nil {
+		return
+	}
 }
 
 func (app *application) showListsHandler(w http.ResponseWriter, r *http.Request) {
