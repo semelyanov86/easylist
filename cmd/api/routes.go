@@ -26,5 +26,7 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id/items", app.showItemsHandler)
 	router.HandlerFunc(http.MethodGet, "/api/v1/items/:id", app.showItemByIdHandler)
 	router.HandlerFunc(http.MethodPost, "/api/v1/items", app.createItemsHandler)
+
+	router.HandlerFunc(http.MethodPost, "/api/v1/users", app.registerUserHandler)
 	return router
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"easylist/internal/data"
 	"flag"
 	"fmt"
 	"log"
@@ -16,9 +17,11 @@ import (
 const version = "1.0.0"
 
 type config struct {
-	port int
-	env  string
-	db   struct {
+	port         int
+	env          string
+	registration bool
+	confirmation bool
+	db           struct {
 		dsn          string
 		maxOpenConns int
 		maxIdleConns int
@@ -29,6 +32,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	models data.Models
 }
 
 func main() {
@@ -42,6 +46,8 @@ func main() {
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "MySql max connection idle time")
 
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development,staging or production)")
+	flag.BoolVar(&cfg.registration, "registration", true, "Is registration enabled")
+	flag.BoolVar(&cfg.confirmation, "confirmation", true, "Is email confirmation enabled")
 	flag.Parse()
 
 	db, err := openDB(cfg)
@@ -58,6 +64,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	srv := &http.Server{

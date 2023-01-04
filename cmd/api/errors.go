@@ -87,7 +87,7 @@ func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.
 	for s, s2 := range errors {
 		errorsData = append(errorsData, errorData{
 			Status: "422",
-			Source: nil,
+			Source: map[string]string{"field": s},
 			Title:  "Validation failed for field " + s,
 			Detail: s2,
 		})
