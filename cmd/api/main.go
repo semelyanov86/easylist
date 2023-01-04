@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"easylist/internal/data"
+	"easylist/internal/jsonlog"
+	"easylist/internal/mailer"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -27,17 +29,27 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	config config
-	logger *log.Logger
+	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
 	var cfg config
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 
 	flag.StringVar(&cfg.db.dsn, "dsn", os.Getenv("EASYLIST_DB_DSN"), "MySQL data source name")
@@ -48,16 +60,23 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development,staging or production)")
 	flag.BoolVar(&cfg.registration, "registration", true, "Is registration enabled")
 	flag.BoolVar(&cfg.confirmation, "confirmation", true, "Is email confirmation enabled")
+
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "192.168.10.10", "SMTP Host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 1025, "SMTP Port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "", "SMTP Username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "", "SMTP Password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "EasyList Admin <admin@sergeyem.ru>", "SMTP Sender")
+
 	flag.Parse()
 
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-			logger.Println(err)
+			logger.PrintError(err, nil)
 		}
 	}(db)
 
@@ -65,6 +84,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	srv := &http.Server{
@@ -75,9 +95,9 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
+	logger.PrintInfo(fmt.Sprintf("starting %s server on %s", cfg.env, srv.Addr), nil)
 	err = srv.ListenAndServe()
-	logger.Fatal(err)
+	logger.PrintFatal(err, nil)
 }
 
 func openDB(cfg config) (*sql.DB, error) {
