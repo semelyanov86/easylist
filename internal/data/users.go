@@ -102,3 +102,51 @@ func (u UserModel) Insert(user *User) error {
 
 	return nil
 }
+
+func (u UserModel) GetByEmail(email string) (*User, error) {
+	var query = `SELECT id, name, email, password, created_at, updated_at, is_active, version FROM users WHERE email = ?`
+	var user User
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := u.DB.QueryRowContext(ctx, query, email).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.IsActive,
+		&user.Version,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &user, nil
+}
+
+func (u UserModel) Update(user *User) error {
+	var query = `UPDATE users SET name = ?, email = ?, password = ?, is_active = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND version = ?`
+	var args = []any{user.Name, user.Email, user.Password.hash, user.IsActive, user.ID, user.Version}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := u.DB.QueryRowContext(ctx, query, args...).Scan()
+	if err != nil {
+		var mySQLError *mysql.MySQLError
+		if errors.As(err, &mySQLError) {
+			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users.email") {
+				return ErrDuplicateEmail
+			}
+		}
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrEditConflict
+		}
+		return err
+	}
+	user.Version++
+	return nil
+}
