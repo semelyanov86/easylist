@@ -2,8 +2,10 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"easylist/internal/validator"
+	"encoding/hex"
 	"errors"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jameskeane/bcrypt"
@@ -134,7 +136,7 @@ func (u UserModel) Update(user *User) error {
 	var args = []any{user.Name, user.Email, user.Password.hash, user.IsActive, user.ID, user.Version}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	err := u.DB.QueryRowContext(ctx, query, args...).Scan()
+	_, err := u.DB.ExecContext(ctx, query, args...)
 	if err != nil {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
@@ -148,5 +150,46 @@ func (u UserModel) Update(user *User) error {
 		return err
 	}
 	user.Version++
+	user.UpdatedAt = time.Now()
 	return nil
+}
+
+func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+        SELECT users.id, users.created_at, users.name, users.email, users.password, users.is_active, users.version
+        FROM users
+        INNER JOIN tokens
+        ON users.id = tokens.user_id
+        WHERE tokens.hash = ?
+        AND tokens.scope = ? 
+        AND tokens.expired_at > ?`
+
+	args := []any{hex.EncodeToString(tokenHash[:]), tokenScope, time.Now()}
+
+	var user User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.IsActive,
+		&user.Version,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
 }

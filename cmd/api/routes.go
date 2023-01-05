@@ -12,6 +12,7 @@ func (app *application) routes() *httprouter.Router {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	router.HandlerFunc(http.MethodGet, "/", home)
+	router.HandlerFunc(http.MethodGet, "/activate", activation)
 	router.ServeFiles("/static/*filepath", http.Dir("ui/static"))
 
 	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", app.healthCheckHandler)
@@ -28,5 +29,7 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPost, "/api/v1/items", app.createItemsHandler)
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/users", app.registerUserHandler)
+	router.HandlerFunc(http.MethodPut, "/api/v1/users/activated", app.activateUserHandler)
+
 	return router
 }

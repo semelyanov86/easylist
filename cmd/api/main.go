@@ -23,6 +23,7 @@ type config struct {
 	env          string
 	registration bool
 	confirmation bool
+	domain       string
 	db           struct {
 		dsn          string
 		maxOpenConns int
@@ -67,6 +68,7 @@ func main() {
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "", "SMTP Password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "EasyList Admin <admin@sergeyem.ru>", "SMTP Sender")
 
+	flag.StringVar(&cfg.domain, "domain", "http://easylist.sergeyem.ru", "Domain name of server")
 	flag.Parse()
 
 	db, err := openDB(cfg)

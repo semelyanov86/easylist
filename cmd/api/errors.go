@@ -94,3 +94,14 @@ func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.
 	}
 	app.errorResponse(w, r, http.StatusUnprocessableEntity, errorsData)
 }
+
+func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request, source string) {
+	message := "unable to update the record due to an edit conflict, please try again"
+	var errors []errorData
+	app.errorResponse(w, r, http.StatusConflict, append(errors, errorData{
+		Status: "409",
+		Source: map[string]string{"source": source},
+		Title:  "Data conflict",
+		Detail: message,
+	}))
+}

@@ -1,11 +1,148 @@
 _type: export
 __export_format: 4
-__export_date: 2023-01-02T08:48:56.250Z
+__export_date: 2023-01-05T16:59:51.752Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
+  - _id: req_97fd2b5ba6b14de3b7015acf58e45848
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1672937404907
+    created: 1672918380009
+    url: "{{ _.URL }}users/activated"
+    name: Activate User
+    description: Activate user with activation token
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "tokens",
+            "attributes": {
+              "token": "ML2HHMJFICLBHNJ3NWD5IOAE2M"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_f51529dcabf74a7bb272b65f1eed15d6
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_120a2d5829f4478aa0d940e7a5a57195
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672918380009
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672833886665
+    created: 1672833886665
+    name: Users
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672833886666
+    _type: request_group
+  - _id: wrk_074fff2091894028b24cd3a631beb9fa
+    parentId: null
+    modified: 1672645019681
+    created: 1672645019681
+    name: Easy List
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_e1b659979fe94904b50e7c3be717d1fa
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1672937902063
+    created: 1672833891583
+    url: "{{ _.URL }}users"
+    name: Registration
+    description: Register in system under new user account
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "users",
+            "attributes": {
+              "name": "Test user 2020",
+              "email": "test2020@mail.ru",
+        			"password": "1qaz2wsx3edc"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_479d7db8550c4fa081fba69c947f7021
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_d6dedd6a9591448da42ccfbc5ee7c2b4
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672833891583
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_79e2d0a481954582a7ae5dc81e924087
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1672833913382
+    created: 1672668455456
+    url: "{{ _.URL }}items/3"
+    name: Get Item By Id
+    description: Retrieve item by ID from DB
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_03b64936a35b4be3914419dd3f4aeed1
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_b6a691b95e7b401398725502ca439b05
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672668455456
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672648793301
+    created: 1672648793301
+    name: Items
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672648793301
+    _type: request_group
   - _id: req_18b2d3de6a0d489db7895b5465d21d21
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1672649020994
+    modified: 1672833934196
     created: 1672648901307
     url: "{{ _.URL }}items"
     name: Create new item
@@ -19,7 +156,12 @@ resources:
             "type": "items",
             "attributes": {
               "name": "Ember Hamster",
-              "description": "http://example.com/images/productivity.png"
+              "description": "http://example.com/images/productivity.png",
+        			"quantity": 1,
+        			"quantity_type": "kg",
+        			"price": 200,
+        			"is_starred": false,
+        			"list_id": 2
             }
           }
         }
@@ -43,27 +185,9 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672648793301
-    created: 1672648793301
-    name: Items
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672648793301
-    _type: request_group
-  - _id: wrk_074fff2091894028b24cd3a631beb9fa
-    parentId: null
-    modified: 1672645019681
-    created: 1672645019681
-    name: Easy List
-    description: ""
-    scope: collection
-    _type: workspace
   - _id: req_744cc286181947d3a84689afa98156ae
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1672648859199
+    modified: 1672668491667
     created: 1672648797363
     url: "{{ _.URL }}lists/1/items"
     name: Get All Items
@@ -90,9 +214,48 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
+  - _id: req_6bca7a9caa704b78ba086b79ebe384f4
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1672667718281
+    created: 1672667671476
+    url: "{{ _.URL }}lists/2"
+    name: Get List By Id
+    description: Retrieve list data by id
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_36a1163e000349bda92523f1a8e93e3e
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_a0bba7501395465ba375198c211da587
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672667671476
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_bb5b42a018f7412fae85e39452655f0b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672648583913
+    created: 1672648583913
+    name: Lists
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672648583913
+    _type: request_group
   - _id: req_ba478905ec2c40019de5569ff733584d
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1672649024250
+    modified: 1672735498818
     created: 1672648687024
     url: "{{ _.URL }}lists"
     name: Create new list
@@ -131,19 +294,9 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_bb5b42a018f7412fae85e39452655f0b
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672648583913
-    created: 1672648583913
-    name: Lists
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672648583913
-    _type: request_group
   - _id: req_f77d688c59f84db7a7e184a24fd4f1da
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1672648668454
+    modified: 1672667695778
     created: 1672648590768
     url: "{{ _.URL }}folders/1/lists"
     name: Get Lists
@@ -170,9 +323,48 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
+  - _id: req_e5fcde207ebe419dbe75dbcceaf415e4
+    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
+    modified: 1672667526549
+    created: 1672664839365
+    url: "{{ _.URL }}folders/7"
+    name: Get Folder By Id
+    description: Retrieve folder by ID from DB
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_e2b5e3a28ed04c35be133bb8ad90e3fb
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_96428eb1ce6041c185e1211cebd22f97
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672664839365
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_ee3b3f669af141b5b2c8377be2d17f94
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672647911898
+    created: 1672647911898
+    name: Folders
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672647911898
+    _type: request_group
   - _id: req_f15cc6d39d5945a7aa39d3010e36600b
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1672648608410
+    modified: 1672755593840
     created: 1672648160352
     url: "{{ _.URL }}folders"
     name: Create New Folder
@@ -186,7 +378,8 @@ resources:
             "type": "folders",
             "attributes": {
               "name": "Ember Hamster",
-              "icon": "fa-folder"
+              "icon": "fa-folder",
+        			"order": 1
             }
           }
         }
@@ -210,19 +403,9 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_ee3b3f669af141b5b2c8377be2d17f94
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672647911898
-    created: 1672647911898
-    name: Folders
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672647911898
-    _type: request_group
   - _id: req_fd86a0c9e0aa49ddad807e9d788a2af4
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1672649189716
+    modified: 1672662239770
     created: 1672647917161
     url: "{{ _.URL }}folders"
     name: Get All Folders
@@ -251,7 +434,7 @@ resources:
     _type: request
   - _id: req_00c2bf62cd5c4c7eaa3dbef39615ed90
     parentId: fld_8702d6560c614c28a361dd04f5e56bfb
-    modified: 1672648091428
+    modified: 1672663668915
     created: 1672645033158
     url: "{{ _.URL }}healthcheck"
     name: Health Check
@@ -266,11 +449,11 @@ resources:
     headers:
       - id: pair_c539913958ec4a0696470d6829cf79d2
         name: Accept
-        value: application/vnd.api+json.
+        value: application/vnd.api+json
         description: ""
       - id: pair_ee323806fac7434abfc908a9e5850d8e
         name: Content-Type
-        value: application/vnd.api+json.
+        value: application/vnd.api+json
         description: ""
     authentication: {}
     metaSortKey: -1672645033158

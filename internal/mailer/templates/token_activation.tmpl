@@ -1,12 +1,10 @@
-{{define "subject"}}Welcome to EasyList{{end}}
+{{define "subject}}Welcome to EasyList{{end}}
 
 {{define "plainBody"}}
 Hi,
 
-Thanks for signing up for a EasyList account. We are excited to have you on board!
-
 To activate your account please click following link:
-{{.domain}}/activate?token={{.activationToken}}
+http://{{.domain}}/activate?token={{.activationToken}}
 
 Please note that this is a one-tome use token and it will expire in 3 days
 
@@ -26,8 +24,7 @@ The EasyList Team
 
 <body>
     <p>Hi,</p>
-    <p>Thanks for signing up for a EasyList account. We're excited to have you on board!</p>
-     <p>To activate your account please click following link: <a href="{{.domain}}/activate?token={{.activationToken}}">http://easylist.sergeyem.ru/activate?token={{.activationToken}}</a></p>
+     <p>To activate your account please click following link: <a href="http://{{.domain}}/activate?token={{.activationToken}}">http://easylist.sergeyem.ru/activate?token={{.activationToken}}</a></p>
     <p>Please note that this is a one-time use token and it will expire in 3 days.</p>
     <p>Thanks,</p>
     <p>The EasyList Team</p>
