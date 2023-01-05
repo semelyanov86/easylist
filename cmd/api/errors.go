@@ -76,7 +76,7 @@ func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Reques
 	var errors []errorData
 	app.errorResponse(w, r, http.StatusBadRequest, append(errors, errorData{
 		Status: "400",
-		Source: map[string]string{"source": source},
+		Source: map[string]string{"pointer": source},
 		Title:  "Bad request",
 		Detail: err.Error(),
 	}))
@@ -100,8 +100,19 @@ func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Requ
 	var errors []errorData
 	app.errorResponse(w, r, http.StatusConflict, append(errors, errorData{
 		Status: "409",
-		Source: map[string]string{"source": source},
+		Source: map[string]string{"pointer": source},
 		Title:  "Data conflict",
+		Detail: message,
+	}))
+}
+
+func (app *application) invalidCredentialsResponse(w http.ResponseWriter, r *http.Request) {
+	message := "Invalid authentication credentials"
+	var errors []errorData
+	app.errorResponse(w, r, http.StatusUnauthorized, append(errors, errorData{
+		Status: "401",
+		Source: map[string]string{"pointer": "createAuthenticationTokenHandler"},
+		Title:  "Auth Error",
 		Detail: message,
 	}))
 }

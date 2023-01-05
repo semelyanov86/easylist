@@ -31,5 +31,7 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPost, "/api/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/api/v1/users/activated", app.activateUserHandler)
 
+	router.HandlerFunc(http.MethodPost, "/api/v1/tokens/authentication", app.createAuthenticationTokenHandler)
+
 	return router
 }
