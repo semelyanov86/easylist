@@ -4,7 +4,6 @@ import (
 	"easylist/internal/data"
 	"easylist/internal/validator"
 	"errors"
-	"github.com/octoper/go-ray"
 	"net/http"
 	"time"
 )
@@ -138,7 +137,6 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	user.IsActive = true
-	ray.Ray(user)
 	err = app.models.Users.Update(user)
 
 	if err != nil {
