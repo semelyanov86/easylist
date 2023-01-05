@@ -116,3 +116,15 @@ func (app *application) invalidCredentialsResponse(w http.ResponseWriter, r *htt
 		Detail: message,
 	}))
 }
+
+func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("www-Authenticate", "Bearer")
+	message := "Invalid or missing authentication token"
+	var errors []errorData
+	app.errorResponse(w, r, http.StatusUnauthorized, append(errors, errorData{
+		Status: "401",
+		Source: map[string]string{"pointer": "authenticate middleware"},
+		Title:  "Auth Error",
+		Detail: message,
+	}))
+}
