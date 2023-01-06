@@ -16,17 +16,18 @@ func (app *application) routes() http.Handler {
 	router.ServeFiles("/static/*filepath", http.Dir("ui/static"))
 
 	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", app.healthCheckHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/folders", app.showFoldersHandler)
-	router.HandlerFunc(http.MethodPost, "/api/v1/folders", app.createFolderHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/folders/:id", app.showFolderByIdHandler)
 
-	router.HandlerFunc(http.MethodGet, "/api/v1/folders/:id/lists", app.showListsHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id", app.showListByIdHandler)
-	router.HandlerFunc(http.MethodPost, "/api/v1/lists", app.createListsHandler)
+	router.HandlerFunc(http.MethodGet, "/api/v1/folders", app.requirePermission("folders:read", app.showFoldersHandler))
+	router.HandlerFunc(http.MethodPost, "/api/v1/folders", app.requirePermission("folders:write", app.createFolderHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/folders/:id", app.requirePermission("folders:read", app.showFolderByIdHandler))
 
-	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id/items", app.showItemsHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/items/:id", app.showItemByIdHandler)
-	router.HandlerFunc(http.MethodPost, "/api/v1/items", app.createItemsHandler)
+	router.HandlerFunc(http.MethodGet, "/api/v1/folders/:id/lists", app.requirePermission("lists:read", app.showListsHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id", app.requirePermission("lists.read", app.showListByIdHandler))
+	router.HandlerFunc(http.MethodPost, "/api/v1/lists", app.requirePermission("lists:write", app.createListsHandler))
+
+	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id/items", app.requirePermission("items:read", app.showItemsHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/items/:id", app.requirePermission("items:read", app.showItemByIdHandler))
+	router.HandlerFunc(http.MethodPost, "/api/v1/items", app.requirePermission("items:write", app.createItemsHandler))
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/api/v1/users/activated", app.activateUserHandler)

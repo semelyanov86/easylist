@@ -128,3 +128,36 @@ func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter
 		Detail: message,
 	}))
 }
+
+func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r *http.Request) {
+	message := "You must be authenticated to access this resource"
+	var errors []errorData
+	app.errorResponse(w, r, http.StatusUnauthorized, append(errors, errorData{
+		Status: "401",
+		Source: map[string]string{"pointer": "authenticate middleware"},
+		Title:  "Authentication Error",
+		Detail: message,
+	}))
+}
+
+func (app *application) inactiveAccountResponse(w http.ResponseWriter, r *http.Request) {
+	message := "Your account must be activated to access this resource"
+	var errors []errorData
+	app.errorResponse(w, r, http.StatusForbidden, append(errors, errorData{
+		Status: "403",
+		Source: map[string]string{"pointer": "authenticate middleware"},
+		Title:  "Auth Error",
+		Detail: message,
+	}))
+}
+
+func (app *application) notPermittedResponse(w http.ResponseWriter, r *http.Request) {
+	message := "Your account does not have necessary permissions for this endpoint"
+	var errors []errorData
+	app.errorResponse(w, r, http.StatusForbidden, append(errors, errorData{
+		Status: "403",
+		Source: map[string]string{"pointer": "permissions middleware"},
+		Title:  "Permissions Error",
+		Detail: message,
+	}))
+}
