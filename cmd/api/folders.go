@@ -123,6 +123,7 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 	var userModel = app.contextGetUser(r)
 
 	folder, err := app.models.Folders.Get(id, userModel.ID)
+	var oldOrder = folder.Order
 
 	if err != nil {
 		switch {
@@ -135,9 +136,9 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	type attributes struct {
-		Name  string `json:"name"`
-		Icon  string `json:"icon"`
-		Order int32  `json:"order"`
+		Name  *string `json:"name"`
+		Icon  *string `json:"icon"`
+		Order *int32  `json:"order"`
 	}
 	type inputAttributes struct {
 		Id         string     `json:"id"`
@@ -159,9 +160,15 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	folder.Name = input.Data.Attributes.Name
-	folder.Icon = input.Data.Attributes.Icon
-	folder.Order = input.Data.Attributes.Order
+	if input.Data.Attributes.Name != nil {
+		folder.Name = *input.Data.Attributes.Name
+	}
+	if input.Data.Attributes.Icon != nil {
+		folder.Icon = *input.Data.Attributes.Icon
+	}
+	if input.Data.Attributes.Order != nil {
+		folder.Order = *input.Data.Attributes.Order
+	}
 
 	v.Check(folder.Order > 0, "data.attributes.order", "order should be greater then zero")
 
@@ -170,10 +177,22 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.models.Folders.Update(folder)
+	err = app.models.Folders.Update(folder, oldOrder)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r, "updateFolderHandler")
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
+	}
+
+	if r.Header.Get("X-Expected-Version") != "" {
+		if strconv.FormatInt(int64(int32(folder.Version)), 32) != r.Header.Get("X-Expected-Version") {
+			app.editConflictResponse(w, r, "updateFolderHandler")
+			return
+		}
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{

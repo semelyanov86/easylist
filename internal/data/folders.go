@@ -80,7 +80,10 @@ func (f FolderModel) Get(id int64, userId int64) (*Folder, error) {
 
 	var folder Folder
 
-	var err = f.DB.QueryRow(query, id, userId).Scan(&folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var err = f.DB.QueryRowContext(ctx, query, id, userId).Scan(&folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -93,32 +96,44 @@ func (f FolderModel) Get(id int64, userId int64) (*Folder, error) {
 	return &folder, nil
 }
 
-func (f FolderModel) Update(folder *Folder) error {
+func (f FolderModel) Update(folder *Folder, oldOrder int32) error {
 	var _, err = f.DB.Exec("START TRANSACTION")
 	if err != nil {
 		return err
 	}
-	var query = "UPDATE folders SET name = ?, icon = ?, `order` = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND user_id = ?"
+	var query = "UPDATE folders SET name = ?, icon = ?, `order` = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND user_id = ? AND version = ?"
 	var args = []any{
 		folder.Name,
 		folder.Icon,
 		folder.Order,
 		folder.ID,
 		folder.UserId,
+		folder.Version,
 	}
 	folder.Version++
 	folder.UpdatedAt = time.Now()
-	var _, err2 = f.DB.Exec(query, args...)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var _, err2 = f.DB.ExecContext(ctx, query, args...)
 	if err2 != nil {
 		f.DB.Exec("ROLLBACK")
-		return err2
+		switch {
+		case errors.Is(err2, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err2
+		}
 	}
 
-	var query2 = "UPDATE folders SET `order` = folders.order+1 WHERE folders.order >= ? AND user_id = ? AND id != ?"
-	var _, err3 = f.DB.Exec(query2, folder.Order, folder.UserId, folder.ID)
-	if err3 != nil {
-		f.DB.Exec("ROLLBACK")
-		return err3
+	if oldOrder != folder.Order {
+		var query2 = "UPDATE folders SET `order` = folders.order+1 WHERE folders.order >= ? AND user_id = ? AND id != ?"
+		var _, err3 = f.DB.ExecContext(ctx, query2, folder.Order, folder.UserId, folder.ID)
+		if err3 != nil {
+			f.DB.Exec("ROLLBACK")
+			return err3
+		}
 	}
 
 	_, err = f.DB.Exec("COMMIT")
@@ -131,7 +146,10 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 	}
 	var query = "DELETE FROM folders WHERE id = ? AND user_id = ?"
 
-	result, err := f.DB.Exec(query, id, userId)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := f.DB.ExecContext(ctx, query, id, userId)
 	if err != nil {
 		return err
 	}
@@ -164,7 +182,7 @@ func (m MockFolderModel) Get(id int64, userId int64) (*Folder, error) {
 	return nil, nil
 }
 
-func (m MockFolderModel) Update(folder *Folder) error {
+func (m MockFolderModel) Update(folder *Folder, oldOrder int32) error {
 	return nil
 }
 
