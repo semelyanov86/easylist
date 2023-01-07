@@ -10,14 +10,14 @@ import (
 )
 
 type Folder struct {
-	ID        int64     `json:"-"`
-	Name      string    `json:"name"`
-	Icon      string    `json:"icon"`
-	Version   int32     `json:"version"`
-	Order     int32     `json:"order"`
-	UserId    int64     `json:"-"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	ID        int64         `json:"-"`
+	Name      string        `json:"name"`
+	Icon      string        `json:"icon"`
+	Version   int32         `json:"version"`
+	Order     int32         `json:"order"`
+	UserId    sql.NullInt64 `json:"-"`
+	CreatedAt time.Time     `json:"-"`
+	UpdatedAt time.Time     `json:"-"`
 }
 
 type FolderModel struct {
@@ -50,7 +50,7 @@ func (f FolderModel) GetLastFolderOrderForUser(userId int64) (int, error) {
 func (f FolderModel) Insert(folder *Folder) error {
 	var query = "INSERT INTO folders (user_id, name, icon, version, `order`, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())"
 
-	lastOrder, err := f.GetLastFolderOrderForUser(folder.UserId)
+	lastOrder, err := f.GetLastFolderOrderForUser(folder.UserId.Int64)
 	if err != nil {
 		return err
 	}
@@ -71,8 +71,26 @@ func (f FolderModel) Insert(folder *Folder) error {
 	return nil
 }
 
-func (f FolderModel) Get(id int64) (*Folder, error) {
-	return nil, nil
+func (f FolderModel) Get(id int64, userId int64) (*Folder, error) {
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	var query = "SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE id = ? AND (user_id = ? OR user_id IS NULL)"
+
+	var folder Folder
+
+	var err = f.DB.QueryRow(query, id, userId).Scan(&folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &folder, nil
 }
 
 func (f FolderModel) Update(folder Folder) error {
@@ -96,7 +114,7 @@ func (m MockFolderModel) Insert(folder *Folder) error {
 	return nil
 }
 
-func (m MockFolderModel) Get(id int64) (*Folder, error) {
+func (m MockFolderModel) Get(id int64, userId int64) (*Folder, error) {
 	return nil, nil
 }
 

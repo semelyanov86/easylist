@@ -29,7 +29,7 @@ type Models struct {
 	}
 	Folders interface {
 		Insert(folder *Folder) error
-		Get(id int64) (*Folder, error)
+		Get(id int64, userId int64) (*Folder, error)
 		Update(folder Folder) error
 		Delete(id int64) error
 	}

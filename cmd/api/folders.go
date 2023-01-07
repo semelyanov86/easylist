@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"easylist/internal/data"
 	"easylist/internal/validator"
+	"errors"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -37,11 +39,14 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 	var userModel = app.contextGetUser(r)
 
 	var folder = &data.Folder{
-		Name:      input.Data.Attributes.Name,
-		Icon:      input.Data.Attributes.Icon,
-		Version:   1,
-		Order:     input.Data.Attributes.Order,
-		UserId:    userModel.ID,
+		Name:    input.Data.Attributes.Name,
+		Icon:    input.Data.Attributes.Icon,
+		Version: 1,
+		Order:   input.Data.Attributes.Order,
+		UserId: sql.NullInt64{
+			Int64: userModel.ID,
+			Valid: true,
+		},
 		CreatedAt: time.Time{},
 		UpdatedAt: time.Time{},
 	}
@@ -85,15 +90,16 @@ func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Req
 		app.notFoundResponse(w, r)
 		return
 	}
-	var folder = data.Folder{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Name:      "Main folder",
-		Icon:      "fa-folder",
-		Version:   1,
-		Order:     1,
-		UserId:    1,
-		UpdatedAt: time.Now(),
+	var userModel = app.contextGetUser(r)
+	folder, err := app.models.Folders.Get(id, userModel.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
 	var envelope = envelope{
 		Id:         id,
