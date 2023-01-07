@@ -93,11 +93,57 @@ func (f FolderModel) Get(id int64, userId int64) (*Folder, error) {
 	return &folder, nil
 }
 
-func (f FolderModel) Update(folder Folder) error {
-	return nil
+func (f FolderModel) Update(folder *Folder) error {
+	var _, err = f.DB.Exec("START TRANSACTION")
+	if err != nil {
+		return err
+	}
+	var query = "UPDATE folders SET name = ?, icon = ?, `order` = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND user_id = ?"
+	var args = []any{
+		folder.Name,
+		folder.Icon,
+		folder.Order,
+		folder.ID,
+		folder.UserId,
+	}
+	folder.Version++
+	folder.UpdatedAt = time.Now()
+	var _, err2 = f.DB.Exec(query, args...)
+	if err2 != nil {
+		f.DB.Exec("ROLLBACK")
+		return err2
+	}
+
+	var query2 = "UPDATE folders SET `order` = folders.order+1 WHERE folders.order >= ? AND user_id = ? AND id != ?"
+	var _, err3 = f.DB.Exec(query2, folder.Order, folder.UserId, folder.ID)
+	if err3 != nil {
+		f.DB.Exec("ROLLBACK")
+		return err3
+	}
+
+	_, err = f.DB.Exec("COMMIT")
+	return err
 }
 
-func (f FolderModel) Delete(id int64) error {
+func (f FolderModel) Delete(id int64, userId int64) error {
+	if id < 1 || userId < 1 {
+		return ErrRecordNotFound
+	}
+	var query = "DELETE FROM folders WHERE id = ? AND user_id = ?"
+
+	result, err := f.DB.Exec(query, id, userId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
 	return nil
 }
 
@@ -118,10 +164,10 @@ func (m MockFolderModel) Get(id int64, userId int64) (*Folder, error) {
 	return nil, nil
 }
 
-func (m MockFolderModel) Update(folder Folder) error {
+func (m MockFolderModel) Update(folder *Folder) error {
 	return nil
 }
 
-func (m MockFolderModel) Delete(id int64) error {
+func (m MockFolderModel) Delete(id int64, userId int64) error {
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -110,4 +111,100 @@ func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	var userModel = app.contextGetUser(r)
+
+	folder, err := app.models.Folders.Get(id, userModel.ID)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	type attributes struct {
+		Name  string `json:"name"`
+		Icon  string `json:"icon"`
+		Order int32  `json:"order"`
+	}
+	type inputAttributes struct {
+		Id         string     `json:"id"`
+		Type       string     `json:"type"`
+		Attributes attributes `json:"attributes"`
+	}
+	var input struct {
+		Data inputAttributes `json:"data"`
+	}
+
+	var v = validator.New()
+
+	err = app.readJSON(w, r, &input)
+
+	v.Check(input.Data.Type == FolderType, "data.type", "Wrong type provided, accepted type is folders")
+	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")
+	if err != nil {
+		app.badRequestResponse(w, r, "updateFolderHandler", err)
+		return
+	}
+
+	folder.Name = input.Data.Attributes.Name
+	folder.Icon = input.Data.Attributes.Icon
+	folder.Order = input.Data.Attributes.Order
+
+	v.Check(folder.Order > 0, "data.attributes.order", "order should be greater then zero")
+
+	if data.ValidateFolder(v, folder); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.Folders.Update(folder)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{
+		Id:         folder.ID,
+		TypeData:   FolderType,
+		Attributes: folder,
+	}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) deleteFolderHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	var userModel = app.contextGetUser(r)
+
+	err = app.models.Folders.Delete(id, userModel.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
