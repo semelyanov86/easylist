@@ -199,3 +199,21 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
+
+type MockUserModel struct{}
+
+func (u MockUserModel) Insert(user *User) error {
+	return nil
+}
+
+func (u MockUserModel) GetByEmail(email string) (*User, error) {
+	return nil, nil
+}
+
+func (u MockUserModel) Update(user *User) error {
+	return nil
+}
+
+func (m MockUserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
+	return nil, nil
+}

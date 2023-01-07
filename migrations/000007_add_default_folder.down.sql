@@ -1,0 +1,1 @@
+DELETE FROM folders WHERE folders.id = 1

@@ -74,3 +74,14 @@ SELECT ?, permissions.id FROM permissions WHERE permissions.code IN (
 	_, err := p.DB.ExecContext(ctx, query, args...)
 	return err
 }
+
+type MockPermissionModel struct {
+}
+
+func (p MockPermissionModel) GetAllForUser(userId int64) (Permissions, error) {
+	return nil, nil
+}
+
+func (p MockPermissionModel) AddForUser(userId int64, codes ...string) error {
+	return nil
+}

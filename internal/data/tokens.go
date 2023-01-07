@@ -74,3 +74,19 @@ func (t TokenModel) DeleteAllForUser(scope string, userId int64) error {
 	_, err := t.DB.ExecContext(ctx, query, scope, userId)
 	return err
 }
+
+type MockTokenModel struct {
+}
+
+func (t MockTokenModel) New(userId int64, ttl time.Duration, scope string) (*Token, error) {
+	token, err := generateToken(userId, ttl, scope)
+	return token, err
+}
+
+func (t MockTokenModel) Insert(token *Token) error {
+	return nil
+}
+
+func (t MockTokenModel) DeleteAllForUser(scope string, userId int64) error {
+	return nil
+}

@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const FolderType = "folders"
+
 func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Request) {
 	type attributes struct {
 		Name  string `json:"name"`
@@ -32,22 +34,40 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 	var v = validator.New()
 	v.Check(input.Data.Type == "folders", "data.type", "Wrong type provided, accepted type is folders")
 
+	var userModel = app.contextGetUser(r)
+
 	var folder = &data.Folder{
 		Name:      input.Data.Attributes.Name,
 		Icon:      input.Data.Attributes.Icon,
 		Version:   1,
 		Order:     input.Data.Attributes.Order,
-		UserId:    1,
+		UserId:    userModel.ID,
 		CreatedAt: time.Time{},
 		UpdatedAt: time.Time{},
 	}
+	// v.Check(folder.Order > 0, "data.attributes.order", "order should be greater then zero")
 	if data.ValidateFolder(v, folder); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	_, err = fmt.Fprintf(w, "%+v\n", input)
+
+	err = app.models.Folders.Insert(folder)
 	if err != nil {
+		app.serverErrorResponse(w, r, err)
 		return
+	}
+
+	var headers = make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/api/v1/folders/%d", folder.ID))
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{
+		Id:         folder.ID,
+		TypeData:   FolderType,
+		Attributes: folder,
+	}, headers)
+
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 	}
 }
 
@@ -77,7 +97,7 @@ func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Req
 	}
 	var envelope = envelope{
 		Id:         id,
-		TypeData:   "folder",
+		TypeData:   FolderType,
 		Attributes: folder,
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope, nil)
