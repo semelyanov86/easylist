@@ -37,6 +37,7 @@ type Models struct {
 		Insert(list *List) error
 		Get(id int64, userId int64) (*List, error)
 		Update(list *List, oldOrder int32) error
+		Delete(id int64, userId int64) error
 	}
 }
 
@@ -56,5 +57,6 @@ func NewMockModels() Models {
 		Tokens:      MockTokenModel{},
 		Permissions: MockPermissionModel{},
 		Folders:     MockFolderModel{},
+		Lists:       MockListModel{},
 	}
 }

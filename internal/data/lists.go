@@ -152,10 +152,54 @@ func (l ListModel) Update(list *List, oldOrder int32) error {
 	return err
 }
 
+func (l ListModel) Delete(id int64, userId int64) error {
+	if id < 1 || userId < 1 {
+		return ErrRecordNotFound
+	}
+	var query = "DELETE FROM lists WHERE id = ? AND user_id = ?"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := l.DB.ExecContext(ctx, query, id, userId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
+}
+
 func ValidateList(v *validator.Validator, list *List) {
 	v.Check(list.Name != "", "data.attributes.name", "must be provided")
 	v.Check(len(list.Name) <= 190, "data.attributes.name", "must be no more than 190 characters")
 	v.Check(list.Icon == "" || strings.HasPrefix(list.Icon, "fa-"), "data.attributes.icon", "icon must starts with fa- prefix")
 	v.Check(list.Order > 0, "data.attributes.order", "order should be greater then zero")
 	v.Check(list.FolderId > 0, "data.attributes.folder_id", "should be greater then zero")
+}
+
+type MockListModel struct {
+}
+
+func (m MockListModel) Insert(list *List) error {
+	return nil
+}
+
+func (m MockListModel) Get(id int64, userId int64) (*List, error) {
+	return nil, nil
+}
+
+func (m MockListModel) Update(list *List, oldOrder int32) error {
+	return nil
+}
+
+func (m MockListModel) Delete(id int64, userId int64) error {
+	return nil
 }
