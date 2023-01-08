@@ -3,16 +3,14 @@ package main
 import (
 	"easylist/internal/data"
 	"easylist/internal/validator"
-	"encoding/base64"
+	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"net/http"
-	"os"
+	"strconv"
 	"time"
 )
 
 const ItemType = "items"
-const StoragePath = "storage/"
 
 func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Request) {
 	type attributes struct {
@@ -69,29 +67,12 @@ func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var fileUuid string
-	if len(input.Data.Attributes.File) > 0 {
-		// we have a photo
-		decoded, err := base64.StdEncoding.DecodeString(input.Data.Attributes.File)
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
-
-		fileUuid = uuid.NewString()
-		var fileName = fmt.Sprintf("%scovers/%d/%s.jpg", StoragePath, userModel.ID, fileUuid)
-		err = os.MkdirAll(fmt.Sprintf("%scovers/%d/", StoragePath, userModel.ID), os.ModePerm)
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
-		// write image to /storage/covers
-		if err := os.WriteFile(fileName, decoded, 0666); err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
-		item.File = fileName
+	fileName, err := app.saveFile(input.Data.Attributes.File, userModel.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
 	}
+	item.File = fileName
 
 	err = app.models.Items.Insert(item)
 	if err != nil {
@@ -131,28 +112,156 @@ func (app *application) showItemByIdHandler(w http.ResponseWriter, r *http.Reque
 		app.notFoundResponse(w, r)
 		return
 	}
-	var item = data.Item{
-		ID:           id,
-		UserId:       1,
-		ListId:       2,
-		Name:         "Super honig",
-		Description:  "This is awesome!",
-		Quantity:     1,
-		QuantityType: "piece",
-		Price:        15.6,
-		IsStarred:    false,
-		File:         "",
-		Order:        1,
-		Version:      1,
-		CreatedAt:    time.Time{},
-		UpdatedAt:    time.Time{},
+	var userModel = app.contextGetUser(r)
+	item, err := app.models.Items.Get(id, userModel.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
+
 	var envelope = envelope{
 		Id:         id,
-		TypeData:   "item",
+		TypeData:   ItemType,
 		Attributes: item,
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	var userModel = app.contextGetUser(r)
+
+	item, err := app.models.Items.Get(id, userModel.ID)
+	var oldOrder = item.Order
+
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	_, err = app.models.Lists.Get(item.ListId, userModel.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notPermittedResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	type attributes struct {
+		ListId       *int64   `json:"list_id"`
+		Name         *string  `json:"name"`
+		Description  *string  `json:"description"`
+		Quantity     *int32   `json:"quantity"`
+		QuantityType *string  `json:"quantity_type"`
+		Price        *float32 `json:"price"`
+		IsStarred    *bool    `json:"is_starred"`
+		File         *string  `json:"file"`
+		Order        *int32   `json:"order"`
+	}
+	type inputAttributes struct {
+		Id         string     `json:"id"`
+		Type       string     `json:"type"`
+		Attributes attributes `json:"attributes"`
+	}
+	var input struct {
+		Data inputAttributes `json:"data"`
+	}
+
+	var v = validator.New()
+
+	err = app.readJSON(w, r, &input)
+
+	v.Check(input.Data.Type == ItemType, "data.type", "Wrong type provided, accepted type is items")
+	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")
+	if err != nil {
+		app.badRequestResponse(w, r, "updateItemHandler", err)
+		return
+	}
+
+	if input.Data.Attributes.Name != nil {
+		item.Name = *input.Data.Attributes.Name
+	}
+	if input.Data.Attributes.ListId != nil {
+		item.ListId = *input.Data.Attributes.ListId
+	}
+	if input.Data.Attributes.Description != nil {
+		item.Description = *input.Data.Attributes.Description
+	}
+	if input.Data.Attributes.Quantity != nil {
+		item.Quantity = *input.Data.Attributes.Quantity
+	}
+	if input.Data.Attributes.QuantityType != nil {
+		item.QuantityType = *input.Data.Attributes.QuantityType
+	}
+	if input.Data.Attributes.Price != nil {
+		item.Price = *input.Data.Attributes.Price
+	}
+	if input.Data.Attributes.IsStarred != nil {
+		item.IsStarred = *input.Data.Attributes.IsStarred
+	}
+	if input.Data.Attributes.Order != nil {
+		item.Order = *input.Data.Attributes.Order
+	}
+	if input.Data.Attributes.File != nil {
+		fileName, err := app.saveFile(*input.Data.Attributes.File, userModel.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		item.File = fileName
+	}
+
+	v.Check(item.Order > 0, "data.attributes.order", "order should be greater then zero")
+
+	if data.ValidateItem(v, item); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.Items.Update(item, oldOrder)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r, "updateItemHandler")
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	if r.Header.Get("X-Expected-Version") != "" {
+		if strconv.FormatInt(int64(item.Version), 32) != r.Header.Get("X-Expected-Version") {
+			app.editConflictResponse(w, r, "updateItemHandler")
+			return
+		}
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{
+		Id:         item.ID,
+		TypeData:   ListType,
+		Attributes: item,
+	}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

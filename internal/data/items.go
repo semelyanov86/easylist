@@ -76,6 +76,81 @@ func (i ItemModel) Insert(item *Item) error {
 	return nil
 }
 
+func (i ItemModel) Get(id int64, userId int64) (*Item, error) {
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	var query = "SELECT id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, created_at, updated_at FROM items WHERE id = ? AND user_id = ?"
+
+	var item Item
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var err = i.DB.QueryRowContext(ctx, query, id, userId).Scan(&item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &item, nil
+}
+
+func (i ItemModel) Update(item *Item, oldOrder int32) error {
+	var _, err = i.DB.Exec("START TRANSACTION")
+	if err != nil {
+		return err
+	}
+	var query = "UPDATE items SET list_id = ?, name = ?, description = ?, quantity = ?, quantity_type = ?, price = ?, is_starred = ?, file = ?, `order` = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND user_id = ? AND version = ?"
+	var args = []any{
+		item.ListId,
+		item.Name,
+		item.Description,
+		item.Quantity,
+		item.QuantityType,
+		item.Price,
+		item.IsStarred,
+		item.File,
+		item.Order,
+		item.ID,
+		item.UserId,
+		item.Version,
+	}
+	item.Version++
+	item.UpdatedAt = time.Now()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var _, err2 = i.DB.ExecContext(ctx, query, args...)
+	if err2 != nil {
+		i.DB.Exec("ROLLBACK")
+		switch {
+		case errors.Is(err2, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err2
+		}
+	}
+
+	if oldOrder != item.Order {
+		var query2 = "UPDATE items SET `order` = items.order+1 WHERE items.order >= ? AND user_id = ? AND id != ?"
+		var _, err3 = i.DB.ExecContext(ctx, query2, item.Order, item.UserId, item.ID)
+		if err3 != nil {
+			i.DB.Exec("ROLLBACK")
+			return err3
+		}
+	}
+
+	_, err = i.DB.Exec("COMMIT")
+	return err
+}
+
 func ValidateItem(v *validator.Validator, item *Item) {
 	v.Check(item.Name != "", "data.attributes.name", "must be provided")
 	v.Check(len(item.Name) <= 190, "data.attributes.name", "must be no more than 190 characters")

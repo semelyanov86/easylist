@@ -1,15 +1,20 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
+
+const StoragePath = "storage/"
 
 type envelope struct {
 	Id         int64  `json:"id,omitempty,string"`
@@ -101,4 +106,27 @@ func (app *application) background(fn func()) {
 		}()
 		fn()
 	}()
+}
+
+func (app *application) saveFile(file string, userId int64) (string, error) {
+	if len(file) > 0 {
+		// we have a photo
+		decoded, err := base64.StdEncoding.DecodeString(file)
+		if err != nil {
+			return "", err
+		}
+
+		var fileUuid = uuid.NewString()
+		var fileName = fmt.Sprintf("%scovers/%d/%s.jpg", StoragePath, userId, fileUuid)
+		err = os.MkdirAll(fmt.Sprintf("%scovers/%d/", StoragePath, userId), os.ModePerm)
+		if err != nil {
+			return "", err
+		}
+		// write image to /storage/covers
+		if err := os.WriteFile(fileName, decoded, 0666); err != nil {
+			return "", err
+		}
+		return fileName, nil
+	}
+	return "", nil
 }
