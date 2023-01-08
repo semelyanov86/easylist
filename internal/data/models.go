@@ -39,6 +39,9 @@ type Models struct {
 		Update(list *List, oldOrder int32) error
 		Delete(id int64, userId int64) error
 	}
+	Items interface {
+		Insert(item *Item) error
+	}
 }
 
 func NewModels(db *sql.DB) Models {
@@ -48,6 +51,7 @@ func NewModels(db *sql.DB) Models {
 		Permissions: PermissionModel{DB: db},
 		Folders:     FolderModel{DB: db},
 		Lists:       ListModel{DB: db},
+		Items:       ItemModel{DB: db},
 	}
 }
 

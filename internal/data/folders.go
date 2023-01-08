@@ -25,7 +25,7 @@ type FolderModel struct {
 }
 
 func (f FolderModel) GetLastFolderOrderForUser(userId int64) (int, error) {
-	var query = "SELECT COALESCE(MAX(`order`),1) AS 'order' FROM folders WHERE folders.user_id = ?"
+	var query = "SELECT COALESCE(MAX(`order`),0) AS 'order' FROM folders WHERE folders.user_id = ?"
 
 	var order = 0
 
