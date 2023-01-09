@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"easylist/internal/validator"
 	"errors"
+	"os"
 	"time"
 )
 
@@ -149,6 +150,46 @@ func (i ItemModel) Update(item *Item, oldOrder int32) error {
 
 	_, err = i.DB.Exec("COMMIT")
 	return err
+}
+
+func (i ItemModel) Delete(id int64, userId int64) error {
+	if id < 1 || userId < 1 {
+		return ErrRecordNotFound
+	}
+	item, err := i.Get(id, userId)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrRecordNotFound
+		default:
+			return err
+		}
+	}
+	var query = "DELETE FROM items WHERE id = ? AND user_id = ?"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := i.DB.ExecContext(ctx, query, id, userId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	if len(item.File) > 0 {
+		e := os.Remove(item.File)
+		if e != nil {
+			return e
+		}
+	}
+	return nil
 }
 
 func ValidateItem(v *validator.Validator, item *Item) {

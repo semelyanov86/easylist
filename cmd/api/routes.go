@@ -33,6 +33,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/api/v1/items/:id", app.requirePermission("items:read", app.showItemByIdHandler))
 	router.HandlerFunc(http.MethodPost, "/api/v1/items", app.requirePermission("items:write", app.createItemsHandler))
 	router.HandlerFunc(http.MethodPatch, "/api/v1/items/:id", app.requirePermission("items:write", app.updateItemHandler))
+	router.HandlerFunc(http.MethodDelete, "/api/v1/items/:id", app.requirePermission("items:write", app.deleteItemHandler))
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/api/v1/users/activated", app.activateUserHandler)

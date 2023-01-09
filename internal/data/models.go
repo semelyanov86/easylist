@@ -43,6 +43,7 @@ type Models struct {
 		Insert(item *Item) error
 		Get(id int64, userId int64) (*Item, error)
 		Update(item *Item, oldOrder int32) error
+		Delete(id int64, userId int64) error
 	}
 }
 
