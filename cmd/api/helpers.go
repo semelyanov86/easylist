@@ -35,6 +35,21 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
+func (app *application) readFieldset(r *http.Request, typeData string) []string {
+	var fieldString = r.URL.Query().Get("fields[" + typeData + "]")
+	var result []string
+	if len(fieldString) < 1 {
+		return result
+	}
+	var fields = strings.Split(fieldString, ",")
+	for _, field := range fields {
+		if field != "id" {
+			result = append(result, field)
+		}
+	}
+	return result
+}
+
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	var envData = envelopeData{Data: data}
 	js, err := json.Marshal(envData)
