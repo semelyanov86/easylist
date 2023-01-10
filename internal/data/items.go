@@ -200,3 +200,26 @@ func ValidateItem(v *validator.Validator, item *Item) {
 	v.Check(item.Quantity >= 0, "data.attributes.quantity", "should be greater then zero")
 	v.Check(item.ListId > 0, "data.attributes.list_id", "should be greater then zero")
 }
+
+type MockItemModel struct {
+}
+
+func (i MockItemModel) GetLastItemOrderForUser(userId int64, listId int64) (int, error) {
+	return 1, nil
+}
+
+func (i MockItemModel) Insert(item *Item) error {
+	return nil
+}
+
+func (i MockItemModel) Get(id int64, userId int64) (*Item, error) {
+	return nil, nil
+}
+
+func (i MockItemModel) Update(item *Item, oldOrder int32) error {
+	return nil
+}
+
+func (i MockItemModel) Delete(id int64, userId int64) error {
+	return nil
+}

@@ -65,5 +65,6 @@ func NewMockModels() Models {
 		Permissions: MockPermissionModel{},
 		Folders:     MockFolderModel{},
 		Lists:       MockListModel{},
+		Items:       MockItemModel{},
 	}
 }
