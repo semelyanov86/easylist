@@ -6,13 +6,19 @@ import (
 	"easylist/internal/validator"
 	"errors"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 	"time"
 )
 
 const FolderType = "folders"
+
+type FolderInput struct {
+	Name string
+	Page int
+	Size int
+	Sort string
+}
 
 func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Request) {
 	type attributes struct {
@@ -78,11 +84,20 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) showFoldersHandler(w http.ResponseWriter, r *http.Request) {
-	_ = httprouter.ParamsFromContext(r.Context())
-	_, err := fmt.Fprintf(w, "showing all folders")
-	if err != nil {
-		panic(err)
+	v := validator.New()
+	qs := r.URL.Query()
+	var input FolderInput
+	input.Name = app.readString(qs, "filter[name]", "")
+	input.Page = app.readInt(qs, "page[number]", 1, v)
+	input.Size = app.readInt(qs, "page[size]", 20, v)
+	input.Sort = app.readString(qs, "sort", "order")
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
 	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Request) {
