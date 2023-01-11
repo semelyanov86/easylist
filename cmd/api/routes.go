@@ -17,7 +17,7 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", app.healthCheckHandler)
 
-	router.HandlerFunc(http.MethodGet, "/api/v1/folders", app.requirePermission("folders:read", app.showFoldersHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/folders", app.requirePermission("folders:read", app.indexFoldersHandler))
 	router.HandlerFunc(http.MethodPost, "/api/v1/folders", app.requirePermission("folders:write", app.createFolderHandler))
 	router.HandlerFunc(http.MethodGet, "/api/v1/folders/:id", app.requirePermission("folders:read", app.showFolderByIdHandler))
 	router.HandlerFunc(http.MethodPatch, "/api/v1/folders/:id", app.requirePermission("folders:write", app.updateFolderHandler))

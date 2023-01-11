@@ -5,19 +5,22 @@ import (
 	"database/sql"
 	"easylist/internal/validator"
 	"errors"
+	"fmt"
+	"github.com/google/jsonapi"
+	_ "github.com/google/jsonapi"
 	"strings"
 	"time"
 )
 
 type Folder struct {
-	ID        int64         `json:"-"`
-	Name      string        `json:"name"`
-	Icon      string        `json:"icon"`
-	Version   int32         `json:"version"`
-	Order     int32         `json:"order"`
+	ID        int64         `jsonapi:"primary,folders"`
+	Name      string        `jsonapi:"attr,name"`
+	Icon      string        `jsonapi:"attr,icon"`
+	Version   int32         `json:"-"`
+	Order     int32         `jsonapi:"attr,order"`
 	UserId    sql.NullInt64 `json:"-"`
-	CreatedAt time.Time     `json:"-"`
-	UpdatedAt time.Time     `json:"-"`
+	CreatedAt time.Time     `jsonapi:"attr,created_at"`
+	UpdatedAt time.Time     `jsonapi:"attr,updated_at"`
 }
 
 type FolderModel struct {
@@ -165,10 +168,49 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
+func (f FolderModel) GetAll(name string, userId int64, filters Filters) ([]*Folder, error) {
+	var query = "SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? ORDER BY `order`"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := f.DB.QueryContext(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var folders = []*Folder{}
+
+	for rows.Next() {
+		var folder Folder
+
+		err := rows.Scan(&folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		folders = append(folders, &folder)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return folders, nil
+}
+
 func ValidateFolder(v *validator.Validator, folder *Folder) {
 	v.Check(folder.Name != "", "data.attributes.name", "must be provided")
 	v.Check(len(folder.Name) <= 190, "data.attributes.name", "must be no more than 190 characters")
 	v.Check(folder.Icon == "" || strings.HasPrefix(folder.Icon, "fa-"), "data.attributes.icon", "icon must starts with fa- prefix")
+}
+
+func (folder Folder) JSONAPILinks() *jsonapi.Links {
+	return &jsonapi.Links{
+		"self": fmt.Sprintf("/api/v1/folders/%d", folder.ID),
+	}
 }
 
 type MockFolderModel struct {
@@ -188,4 +230,8 @@ func (m MockFolderModel) Update(folder *Folder, oldOrder int32) error {
 
 func (m MockFolderModel) Delete(id int64, userId int64) error {
 	return nil
+}
+
+func (m MockFolderModel) GetAll(name string, userId int64, filters Filters) ([]*Folder, error) {
+	return nil, nil
 }

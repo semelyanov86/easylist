@@ -8,6 +8,8 @@ github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ
 github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/gomarkdown/markdown v0.0.0-20210208175418-bda154fe17d8 h1:nWU6p08f1VgIalT6iZyqXi4o5cZsz4X6qa87nusfcsc=
 github.com/gomarkdown/markdown v0.0.0-20210208175418-bda154fe17d8/go.mod h1:aii0r/K0ZnHv7G0KF7xy1v0A7s2Ljrb5byB7MO5p6TU=
+github.com/google/jsonapi v1.0.0 h1:qIGgO5Smu3yJmSs+QlvhQnrscdZfFhiV6S8ryJAglqU=
+github.com/google/jsonapi v1.0.0/go.mod h1:YYHiRPJT8ARXGER8In9VuLv4qvLfDmA9ULQqptbLE4s=
 github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
 github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=

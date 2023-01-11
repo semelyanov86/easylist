@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/jsonapi"
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	"io"
@@ -25,7 +26,7 @@ type envelope struct {
 }
 
 type envelopeData struct {
-	Data envelope `json:"data"`
+	Data any `json:"data"`
 }
 
 func (app *application) readIDParam(r *http.Request) (int64, error) {
@@ -52,20 +53,13 @@ func (app *application) readFieldset(r *http.Request, typeData string) []string 
 	return result
 }
 
-func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
-	var envData = envelopeData{Data: data}
-	js, err := json.Marshal(envData)
-	if err != nil {
-		return err
-	}
-	js = append(js, '\n')
+func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
+	w.Header().Set("Content-Type", jsonapi.MediaType)
 	for key, value := range headers {
 		w.Header()[key] = value
 	}
-	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(status)
-	_, err = w.Write(js)
-	if err != nil {
+	if err := jsonapi.MarshalPayload(w, data); err != nil {
 		return err
 	}
 	return nil

@@ -15,9 +15,7 @@ const FolderType = "folders"
 
 type FolderInput struct {
 	Name string
-	Page int
-	Size int
-	Sort string
+	data.Filters
 }
 
 func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Request) {
@@ -83,21 +81,33 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (app *application) showFoldersHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) indexFoldersHandler(w http.ResponseWriter, r *http.Request) {
 	v := validator.New()
 	qs := r.URL.Query()
 	var input FolderInput
+	var userModel = app.contextGetUser(r)
 	input.Name = app.readString(qs, "filter[name]", "")
-	input.Page = app.readInt(qs, "page[number]", 1, v)
-	input.Size = app.readInt(qs, "page[size]", 20, v)
-	input.Sort = app.readString(qs, "sort", "order")
+	input.Filters.Page = app.readInt(qs, "page[number]", 1, v)
+	input.Filters.Size = app.readInt(qs, "page[size]", 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "order")
 
-	if !v.Valid() {
+	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "-id", "-name", "-order", "-created_at", "-updated_at"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
+	folders, err := app.models.Folders.GetAll(input.Name, userModel.ID, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, folders, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -117,12 +127,7 @@ func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Req
 		}
 		return
 	}
-	var envelope = envelope{
-		Id:         id,
-		TypeData:   FolderType,
-		Attributes: folder,
-	}
-	err = app.writeJSON(w, http.StatusOK, envelope, nil)
+	err = app.writeJSON(w, http.StatusOK, folder, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
