@@ -19,49 +19,31 @@ type FolderInput struct {
 }
 
 func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Request) {
-	type attributes struct {
-		Name  string `json:"name"`
-		Icon  string `json:"icon"`
-		Order int32  `json:"order"`
-	}
-
-	type inputAttributes struct {
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes
-	}
-	var err = app.readJSON(w, r, &input)
-
-	if err != nil {
+	var folder = new(data.Folder)
+	if err := app.readJsonApi(r, folder); err != nil {
 		app.badRequestResponse(w, r, "createFolderHandler", err)
 		return
 	}
+
 	var v = validator.New()
-	v.Check(input.Data.Type == "folders", "data.type", "Wrong type provided, accepted type is folders")
 
 	var userModel = app.contextGetUser(r)
 
-	var folder = &data.Folder{
-		Name:    input.Data.Attributes.Name,
-		Icon:    input.Data.Attributes.Icon,
-		Version: 1,
-		Order:   input.Data.Attributes.Order,
-		UserId: sql.NullInt64{
-			Int64: userModel.ID,
-			Valid: true,
-		},
-		CreatedAt: time.Time{},
-		UpdatedAt: time.Time{},
+	folder.UserId = sql.NullInt64{
+		Int64: userModel.ID,
+		Valid: true,
 	}
+	folder.Version = 1
+	folder.CreatedAt = time.Time{}
+	folder.UpdatedAt = time.Time{}
+
 	// v.Check(folder.Order > 0, "data.attributes.order", "order should be greater then zero")
 	if data.ValidateFolder(v, folder); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	err = app.models.Folders.Insert(folder)
+	var err = app.models.Folders.Insert(folder)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -70,11 +52,7 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 	var headers = make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/api/v1/folders/%d", folder.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{
-		Id:         folder.ID,
-		TypeData:   FolderType,
-		Attributes: folder,
-	}, headers)
+	err = app.writeJSON(w, http.StatusCreated, folder, headers)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -155,41 +133,23 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	type attributes struct {
-		Name  *string `json:"name"`
-		Icon  *string `json:"icon"`
-		Order *int32  `json:"order"`
-	}
-	type inputAttributes struct {
-		Id         string     `json:"id"`
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
-
-	var v = validator.New()
-
-	err = app.readJSON(w, r, &input)
-
-	v.Check(input.Data.Type == FolderType, "data.type", "Wrong type provided, accepted type is folders")
-	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")
-	if err != nil {
+	var inputFolder = new(data.Folder)
+	if err := app.readJsonApi(r, inputFolder); err != nil {
 		app.badRequestResponse(w, r, "updateFolderHandler", err)
 		return
 	}
 
-	if input.Data.Attributes.Name != nil {
-		folder.Name = *input.Data.Attributes.Name
+	if inputFolder.Name != "" {
+		folder.Name = inputFolder.Name
 	}
-	if input.Data.Attributes.Icon != nil {
-		folder.Icon = *input.Data.Attributes.Icon
+	if inputFolder.Icon != "" {
+		folder.Icon = inputFolder.Icon
 	}
-	if input.Data.Attributes.Order != nil {
-		folder.Order = *input.Data.Attributes.Order
+	if inputFolder.Order != 0 {
+		folder.Order = inputFolder.Order
 	}
 
+	var v = validator.New()
 	v.Check(folder.Order > 0, "data.attributes.order", "order should be greater then zero")
 
 	if data.ValidateFolder(v, folder); !v.Valid() {
@@ -209,17 +169,13 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if r.Header.Get("X-Expected-Version") != "" {
-		if strconv.FormatInt(int64(int32(folder.Version)), 32) != r.Header.Get("X-Expected-Version") {
+		if strconv.FormatInt(int64(folder.Version), 32) != r.Header.Get("X-Expected-Version") {
 			app.editConflictResponse(w, r, "updateFolderHandler")
 			return
 		}
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{
-		Id:         folder.ID,
-		TypeData:   FolderType,
-		Attributes: folder,
-	}, nil)
+	err = app.writeJSON(w, http.StatusOK, folder, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
