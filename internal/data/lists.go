@@ -5,21 +5,23 @@ import (
 	"database/sql"
 	"easylist/internal/validator"
 	"errors"
+	"fmt"
+	"github.com/google/jsonapi"
 	"strings"
 	"time"
 )
 
 type List struct {
-	ID        int64     `json:"-"`
+	ID        int64     `jsonapi:"primary,lists"`
 	UserId    int64     `json:"-"`
-	FolderId  int64     `json:"folder_id"`
-	Name      string    `json:"name"`
-	Icon      string    `json:"icon"`
-	Link      Link      `json:"link"`
-	Order     int32     `json:"order"`
-	Version   int32     `json:"version"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	FolderId  int64     `jsonapi:"attr,folder_id"`
+	Name      string    `jsonapi:"attr,name"`
+	Icon      string    `jsonapi:"attr,icon"`
+	Link      Link      `jsonapi:"attr,link"`
+	Order     int32     `jsonapi:"attr,order"`
+	Version   int32     `json:"-"`
+	CreatedAt time.Time `jsonapi:"attr,created_at"`
+	UpdatedAt time.Time `jsonapi:"attr,updated_at"`
 }
 
 type ListModel struct {
@@ -183,6 +185,12 @@ func ValidateList(v *validator.Validator, list *List) {
 	v.Check(list.Icon == "" || strings.HasPrefix(list.Icon, "fa-"), "data.attributes.icon", "icon must starts with fa- prefix")
 	v.Check(list.Order > 0, "data.attributes.order", "order should be greater then zero")
 	v.Check(list.FolderId > 0, "data.attributes.folder_id", "should be greater then zero")
+}
+
+func (list List) JSONAPILinks() *jsonapi.Links {
+	return &jsonapi.Links{
+		"self": fmt.Sprintf("/api/v1/lists/%d", list.ID),
+	}
 }
 
 type MockListModel struct {

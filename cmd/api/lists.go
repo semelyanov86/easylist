@@ -107,12 +107,7 @@ func (app *application) showListByIdHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var envelope = envelope{
-		Id:         id,
-		TypeData:   ListType,
-		Attributes: list,
-	}
-	err = app.writeJSON(w, http.StatusOK, envelope, nil)
+	err = app.writeJSON(w, http.StatusOK, list, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
