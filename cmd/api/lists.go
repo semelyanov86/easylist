@@ -15,42 +15,36 @@ import (
 const ListType = "lists"
 
 func (app *application) createListsHandler(w http.ResponseWriter, r *http.Request) {
-	type attributes struct {
-		Name     string `json:"name"`
-		Icon     string `json:"icon"`
-		FolderId int64  `json:"folder_id"`
-		Order    int32  `json:"order"`
-	}
-
-	type inputAttributes struct {
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes
+	var list = new(data.List)
+	if err := app.readJsonApi(r, list); err != nil {
+		app.badRequestResponse(w, r, "createListsHandler", err)
+		return
 	}
 
 	var userModel = app.contextGetUser(r)
 
-	var err = app.readJSON(w, r, &input)
+	var folderId = list.FolderId
+	if folderId == 0 {
+		folderId = 1
+	}
+	_, err := app.models.Folders.Get(folderId, userModel.ID)
+	var v = validator.New()
 	if err != nil {
-		app.badRequestResponse(w, r, "createListHandler", err)
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("data.attributes.folder_id", "this folder does not exists")
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
-	var v = validator.New()
-	v.Check(input.Data.Type == "lists", "data.type", "Wrong type provided, accepted type is lists")
 
-	var list = &data.List{
-		ID:        1,
-		UserId:    userModel.ID,
-		FolderId:  input.Data.Attributes.FolderId,
-		Name:      input.Data.Attributes.Name,
-		Icon:      input.Data.Attributes.Icon,
-		Order:     1,
-		Version:   1,
-		CreatedAt: time.Time{},
-		UpdatedAt: time.Time{},
-	}
+	list.ID = 1
+	list.UserId = userModel.ID
+	list.Order = 1
+	list.Version = 1
+	list.CreatedAt = time.Now()
+	list.UpdatedAt = time.Now()
 
 	if data.ValidateList(v, list); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
@@ -66,11 +60,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	var headers = make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/api/v1/lists/%d", list.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{
-		Id:         list.ID,
-		TypeData:   ListType,
-		Attributes: list,
-	}, headers)
+	err = app.writeJSON(w, http.StatusCreated, list, headers)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -146,46 +136,27 @@ func (app *application) updateListHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	type attributes struct {
-		Name     *string `json:"name"`
-		Icon     *string `json:"icon"`
-		Order    *int32  `json:"order"`
-		FolderId *int64  `json:"folder_id"`
-		IsPublic bool    `json:"is_public"`
-	}
-	type inputAttributes struct {
-		Id         string     `json:"id"`
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
-
 	var v = validator.New()
 
-	err = app.readJSON(w, r, &input)
-
-	v.Check(input.Data.Type == ListType, "data.type", "Wrong type provided, accepted type is lists")
-	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")
-	if err != nil {
+	var inputList = new(data.List)
+	if err := app.readJsonApi(r, inputList); err != nil {
 		app.badRequestResponse(w, r, "updateListHandler", err)
 		return
 	}
 
-	if input.Data.Attributes.Name != nil {
-		list.Name = *input.Data.Attributes.Name
+	if inputList.Name != "" {
+		list.Name = inputList.Name
 	}
-	if input.Data.Attributes.Icon != nil {
-		list.Icon = *input.Data.Attributes.Icon
+	if inputList.Icon != "" {
+		list.Icon = inputList.Icon
 	}
-	if input.Data.Attributes.Order != nil {
-		list.Order = *input.Data.Attributes.Order
+	if inputList.Order != 0 {
+		list.Order = inputList.Order
 	}
-	if input.Data.Attributes.FolderId != nil {
-		list.FolderId = *input.Data.Attributes.FolderId
+	if inputList.FolderId != 0 {
+		list.FolderId = inputList.FolderId
 	}
-	if input.Data.Attributes.IsPublic && !list.Link.Valid {
+	if inputList.IsPublic && !list.Link.Valid {
 		list.Link = data.Link{
 			NullString: sql.NullString{
 				String: uuid.NewString(),
@@ -219,11 +190,7 @@ func (app *application) updateListHandler(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{
-		Id:         list.ID,
-		TypeData:   ListType,
-		Attributes: list,
-	}, nil)
+	err = app.writeJSON(w, http.StatusOK, list, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

@@ -22,6 +22,7 @@ type List struct {
 	Version   int32     `json:"-"`
 	CreatedAt time.Time `jsonapi:"attr,created_at"`
 	UpdatedAt time.Time `jsonapi:"attr,updated_at"`
+	IsPublic  bool      `json:"-"`
 }
 
 type ListModel struct {
