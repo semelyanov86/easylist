@@ -10,20 +10,20 @@ import (
 )
 
 type Item struct {
-	ID           int64     `json:"-"`
+	ID           int64     `jsonapi:"primary,items"`
 	UserId       int64     `json:"-"`
-	ListId       int64     `json:"list_id"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description"`
-	Quantity     int32     `json:"quantity"`
-	QuantityType string    `json:"quantity_type"`
-	Price        float32   `json:"price"`
-	IsStarred    bool      `json:"is_starred"`
-	File         string    `json:"file"`
-	Order        int32     `json:"order"`
+	ListId       int64     `jsonapi:"attr,list_id"`
+	Name         string    `jsonapi:"attr,name"`
+	Description  string    `jsonapi:"attr,description"`
+	Quantity     int32     `jsonapi:"attr,quantity"`
+	QuantityType string    `jsonapi:"attr,quantity_type"`
+	Price        float32   `jsonapi:"attr,price"`
+	IsStarred    bool      `jsonapi:"attr,is_starred"`
+	File         string    `jsonapi:"attr,file"`
+	Order        int32     `jsonapi:"attr,order"`
 	Version      int32     `json:"-"`
-	CreatedAt    time.Time `json:"-"`
-	UpdatedAt    time.Time `json:"-"`
+	CreatedAt    time.Time `jsonapi:"attr,created_at"`
+	UpdatedAt    time.Time `jsonapi:"attr,updated_at"`
 }
 
 type ItemModel struct {

@@ -13,61 +13,32 @@ import (
 const ItemType = "items"
 
 func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Request) {
-	type attributes struct {
-		Name         string  `json:"name"`
-		Description  string  `json:"description"`
-		Quantity     int32   `json:"quantity"`
-		QuantityType string  `json:"quantity_type"`
-		Price        float32 `json:"price"`
-		IsStarred    bool    `json:"is_starred"`
-		ListId       int64   `json:"list_id"`
-		Order        int32   `json:"order"`
-		File         string  `json:"file"`
-	}
-
-	type inputAttributes struct {
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes
+	var item = new(data.Item)
+	if err := app.readJsonApi(r, item); err != nil {
+		app.badRequestResponse(w, r, "createItemsHandler", err)
+		return
 	}
 
 	var userModel = app.contextGetUser(r)
 
-	var err = app.readJSON(w, r, &input)
-	if err != nil {
-		app.badRequestResponse(w, r, "createItemsHandler", err)
-		return
-	}
-	_, err = app.models.Lists.Get(input.Data.Attributes.ListId, userModel.ID)
+	_, err := app.models.Lists.Get(item.ListId, userModel.ID)
 	var v = validator.New()
 	if err != nil {
 		v.AddError("data.attributes.list_id", "Can not find current list id")
 	}
 
-	v.Check(input.Data.Type == "items", "data.type", "Wrong type provided, accepted type is items")
+	item.Version = 1
+	item.Order = 1
+	item.UserId = userModel.ID
+	item.CreatedAt = time.Now()
+	item.UpdatedAt = time.Now()
 
-	var item = &data.Item{
-		Name:         input.Data.Attributes.Name,
-		Description:  input.Data.Attributes.Description,
-		ListId:       input.Data.Attributes.ListId,
-		Price:        input.Data.Attributes.Price,
-		IsStarred:    input.Data.Attributes.IsStarred,
-		Quantity:     input.Data.Attributes.Quantity,
-		QuantityType: input.Data.Attributes.QuantityType,
-		Version:      1,
-		Order:        1,
-		UserId:       userModel.ID,
-		CreatedAt:    time.Time{},
-		UpdatedAt:    time.Time{},
-	}
 	if data.ValidateItem(v, item); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	fileName, err := app.saveFile(input.Data.Attributes.File, userModel.ID)
+	fileName, err := app.saveFile(item.File, userModel.ID)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -83,11 +54,7 @@ func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Reques
 	var headers = make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/api/v1/items/%d", item.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{
-		Id:         item.ID,
-		TypeData:   ItemType,
-		Attributes: item,
-	}, headers)
+	err = app.writeJSON(w, http.StatusCreated, item, headers)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -124,12 +91,7 @@ func (app *application) showItemByIdHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var envelope = envelope{
-		Id:         id,
-		TypeData:   ItemType,
-		Attributes: item,
-	}
-	err = app.writeJSON(w, http.StatusOK, envelope, nil)
+	err = app.writeJSON(w, http.StatusOK, item, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -168,63 +130,43 @@ func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	type attributes struct {
-		ListId       *int64   `json:"list_id"`
-		Name         *string  `json:"name"`
-		Description  *string  `json:"description"`
-		Quantity     *int32   `json:"quantity"`
-		QuantityType *string  `json:"quantity_type"`
-		Price        *float32 `json:"price"`
-		IsStarred    *bool    `json:"is_starred"`
-		File         *string  `json:"file"`
-		Order        *int32   `json:"order"`
-	}
-	type inputAttributes struct {
-		Id         string     `json:"id"`
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
-
 	var v = validator.New()
 
-	err = app.readJSON(w, r, &input)
+	var inputItem = new(data.Item)
+	if err := app.readJsonApi(r, inputItem); err != nil {
+		app.badRequestResponse(w, r, "updateItemHandler", err)
+		return
+	}
 
-	v.Check(input.Data.Type == ItemType, "data.type", "Wrong type provided, accepted type is items")
-	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")
 	if err != nil {
 		app.badRequestResponse(w, r, "updateItemHandler", err)
 		return
 	}
 
-	if input.Data.Attributes.Name != nil {
-		item.Name = *input.Data.Attributes.Name
+	if inputItem.Name != "" {
+		item.Name = inputItem.Name
 	}
-	if input.Data.Attributes.ListId != nil {
-		item.ListId = *input.Data.Attributes.ListId
+	if inputItem.ListId != 0 {
+		item.ListId = inputItem.ListId
 	}
-	if input.Data.Attributes.Description != nil {
-		item.Description = *input.Data.Attributes.Description
+	if inputItem.Description != "" {
+		item.Description = inputItem.Description
 	}
-	if input.Data.Attributes.Quantity != nil {
-		item.Quantity = *input.Data.Attributes.Quantity
+	if inputItem.Quantity != 0 {
+		item.Quantity = inputItem.Quantity
 	}
-	if input.Data.Attributes.QuantityType != nil {
-		item.QuantityType = *input.Data.Attributes.QuantityType
+	if inputItem.QuantityType != "" {
+		item.QuantityType = inputItem.QuantityType
 	}
-	if input.Data.Attributes.Price != nil {
-		item.Price = *input.Data.Attributes.Price
+	if inputItem.Price != 0 {
+		item.Price = inputItem.Price
 	}
-	if input.Data.Attributes.IsStarred != nil {
-		item.IsStarred = *input.Data.Attributes.IsStarred
+	item.IsStarred = inputItem.IsStarred
+	if inputItem.Order != 0 {
+		item.Order = inputItem.Order
 	}
-	if input.Data.Attributes.Order != nil {
-		item.Order = *input.Data.Attributes.Order
-	}
-	if input.Data.Attributes.File != nil {
-		fileName, err := app.saveFile(*input.Data.Attributes.File, userModel.ID)
+	if inputItem.File != "" {
+		fileName, err := app.saveFile(inputItem.File, userModel.ID)
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
 			return
@@ -257,11 +199,7 @@ func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{
-		Id:         item.ID,
-		TypeData:   ListType,
-		Attributes: item,
-	}, nil)
+	err = app.writeJSON(w, http.StatusOK, item, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

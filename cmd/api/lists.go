@@ -156,6 +156,7 @@ func (app *application) updateListHandler(w http.ResponseWriter, r *http.Request
 	if inputList.FolderId != 0 {
 		list.FolderId = inputList.FolderId
 	}
+
 	if inputList.IsPublic && !list.Link.Valid {
 		list.Link = data.Link{
 			NullString: sql.NullString{
