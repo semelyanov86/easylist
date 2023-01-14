@@ -130,43 +130,63 @@ func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var v = validator.New()
-
-	var inputItem = new(data.Item)
-	if err := app.readJsonApi(r, inputItem); err != nil {
-		app.badRequestResponse(w, r, "updateItemHandler", err)
-		return
+	type attributes struct {
+		ListId       *int64   `json:"list_id"`
+		Name         *string  `json:"name"`
+		Description  *string  `json:"description"`
+		Quantity     *int32   `json:"quantity"`
+		QuantityType *string  `json:"quantity_type"`
+		Price        *float32 `json:"price"`
+		IsStarred    *bool    `json:"is_starred"`
+		File         *string  `json:"file"`
+		Order        *int32   `json:"order"`
+	}
+	type inputAttributes struct {
+		Id         string     `json:"id"`
+		Type       string     `json:"type"`
+		Attributes attributes `json:"attributes"`
+	}
+	var input struct {
+		Data inputAttributes `json:"data"`
 	}
 
+	var v = validator.New()
+
+	err = app.readJSON(w, r, &input)
+
+	v.Check(input.Data.Type == ItemType, "data.type", "Wrong type provided, accepted type is items")
+	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")
 	if err != nil {
 		app.badRequestResponse(w, r, "updateItemHandler", err)
 		return
 	}
 
-	if inputItem.Name != "" {
-		item.Name = inputItem.Name
+	if input.Data.Attributes.Name != nil {
+		item.Name = *input.Data.Attributes.Name
 	}
-	if inputItem.ListId != 0 {
-		item.ListId = inputItem.ListId
+	if input.Data.Attributes.ListId != nil {
+		item.ListId = *input.Data.Attributes.ListId
 	}
-	if inputItem.Description != "" {
-		item.Description = inputItem.Description
+	if input.Data.Attributes.Description != nil {
+		item.Description = *input.Data.Attributes.Description
 	}
-	if inputItem.Quantity != 0 {
-		item.Quantity = inputItem.Quantity
+	if input.Data.Attributes.Quantity != nil {
+		item.Quantity = *input.Data.Attributes.Quantity
 	}
-	if inputItem.QuantityType != "" {
-		item.QuantityType = inputItem.QuantityType
+	if input.Data.Attributes.QuantityType != nil {
+		item.QuantityType = *input.Data.Attributes.QuantityType
 	}
-	if inputItem.Price != 0 {
-		item.Price = inputItem.Price
+	if input.Data.Attributes.Price != nil {
+		item.Price = *input.Data.Attributes.Price
 	}
-	item.IsStarred = inputItem.IsStarred
-	if inputItem.Order != 0 {
-		item.Order = inputItem.Order
+	if input.Data.Attributes.IsStarred != nil {
+		item.IsStarred = *input.Data.Attributes.IsStarred
 	}
-	if inputItem.File != "" {
-		fileName, err := app.saveFile(inputItem.File, userModel.ID)
+	if input.Data.Attributes.Order != nil {
+		item.Order = *input.Data.Attributes.Order
+	}
+	if input.Data.Attributes.File != nil {
+		fileName, err := app.saveFile(*input.Data.Attributes.File, userModel.ID)
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
 			return
