@@ -169,12 +169,12 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 }
 
 func (f FolderModel) GetAll(name string, userId int64, filters Filters) ([]*Folder, error) {
-	var query = "SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? ORDER BY `order`"
+	var query = "SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `order`"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := f.DB.QueryContext(ctx, query, userId)
+	rows, err := f.DB.QueryContext(ctx, query, userId, name, name)
 	if err != nil {
 		return nil, err
 	}
