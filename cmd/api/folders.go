@@ -6,12 +6,11 @@ import (
 	"easylist/internal/validator"
 	"errors"
 	"fmt"
+	"github.com/google/jsonapi"
 	"net/http"
 	"strconv"
 	"time"
 )
-
-const FolderType = "folders"
 
 type FolderInput struct {
 	Name string
@@ -65,8 +64,8 @@ func (app *application) indexFoldersHandler(w http.ResponseWriter, r *http.Reque
 	var input FolderInput
 	var userModel = app.contextGetUser(r)
 	input.Name = app.readString(qs, "filter[name]", "")
-	input.Filters.Page = app.readInt(qs, "page[number]", 1, v)
-	input.Filters.Size = app.readInt(qs, "page[size]", 20, v)
+	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
+	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "order")
 
 	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "-id", "-name", "-order", "-created_at", "-updated_at"}

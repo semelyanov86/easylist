@@ -15,6 +15,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20210208175418-bda154fe17d8 // indirect
 	github.com/google/jsonapi v1.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/mfcochauxlaberge/jsonapi v0.21.0 // indirect
 	github.com/octoper/go-ray v0.1.5 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )

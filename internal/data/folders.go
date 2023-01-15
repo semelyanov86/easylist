@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/jsonapi"
-	_ "github.com/google/jsonapi"
+	_ "github.com/mfcochauxlaberge/jsonapi"
 	"strings"
 	"time"
 )
+
+const FolderType = "folders"
 
 type Folder struct {
 	ID        int64         `jsonapi:"primary,folders"`
@@ -169,12 +171,12 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 }
 
 func (f FolderModel) GetAll(name string, userId int64, filters Filters) ([]*Folder, error) {
-	var query = "SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `order`"
+	var query = fmt.Sprintf("SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := f.DB.QueryContext(ctx, query, userId, name, name)
+	rows, err := f.DB.QueryContext(ctx, query, userId, name, name, filters.limit(), filters.offset())
 	if err != nil {
 		return nil, err
 	}
