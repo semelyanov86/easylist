@@ -96,11 +96,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		})
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{
-		Id:         user.ID,
-		TypeData:   USERS_TYPE_NAME,
-		Attributes: user,
-	}, nil)
+	err = app.writeJSON(w, http.StatusCreated, user, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -160,11 +156,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{
-		Id:         user.ID,
-		TypeData:   USERS_TYPE_NAME,
-		Attributes: user,
-	}, nil)
+	err = app.writeJSON(w, http.StatusOK, user, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

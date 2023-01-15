@@ -15,13 +15,13 @@ import (
 )
 
 type User struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
+	ID        int64     `jsonapi:"primary,users"`
+	CreatedAt time.Time `jsonapi:"attr,created_at"`
+	UpdatedAt time.Time `jsonapi:"attr,updated_at"`
+	Name      string    `jsonapi:"attr,name"`
+	Email     string    `jsonapi:"attr,email"`
 	Password  password  `json:"-"`
-	IsActive  bool      `json:"is_active"`
+	IsActive  bool      `jsonapi:"attr,is_active"`
 	Version   int       `json:"-"`
 }
 
