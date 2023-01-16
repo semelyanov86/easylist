@@ -217,13 +217,19 @@ func ValidateFolder(v *validator.Validator, folder *Folder) {
 
 func (folder Folder) JSONAPILinks() *jsonapi.Links {
 	return &jsonapi.Links{
-		"self": fmt.Sprintf("/api/v1/folders/%d", folder.ID),
+		"self": fmt.Sprintf("%s/api/v1/folders/%d", DomainName, folder.ID),
 	}
 }
 
 func (folders Folders) JSONAPILinks() *jsonapi.Links {
 	return &jsonapi.Links{
-		jsonapi.KeyLastPage: "/api/v1/folders?page[number]=5&page[size]=5",
+		jsonapi.KeyLastPage: "",
+	}
+}
+
+func (folders Folders) JSONAPIMeta() *jsonapi.Meta {
+	return &jsonapi.Meta{
+		"total": 0,
 	}
 }
 

@@ -29,7 +29,7 @@ func calculateMetadata(totalRecords, page, pageSize int) Metadata {
 	}
 	var lastPage = int(math.Ceil(float64(totalRecords) / float64(pageSize)))
 	var nextPage = page + 1
-	if nextPage != lastPage {
+	if nextPage > lastPage {
 		nextPage = 0
 	}
 	return Metadata{

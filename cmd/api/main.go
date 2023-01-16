@@ -71,6 +71,7 @@ func main() {
 	flag.StringVar(&cfg.domain, "domain", "http://easylist.sergeyem.ru", "Domain name of server")
 	flag.Parse()
 
+	data.DomainName = cfg.domain
 	db, err := openDB(cfg)
 	if err != nil {
 		logger.PrintFatal(err, nil)

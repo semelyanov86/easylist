@@ -76,6 +76,7 @@ func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, da
 	if err != nil {
 		return err
 	}
+
 	if manyPayload, ok := res.(*jsonapi.ManyPayload); ok {
 		manyPayload.Links = &jsonapi.Links{
 			jsonapi.KeyFirstPage:    app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.FirstPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
@@ -89,9 +90,7 @@ func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, da
 		if metadata.PrevPage == 0 {
 			(*manyPayload.Links)[jsonapi.KeyPreviousPage] = nil
 		}
-		manyPayload.Meta = &jsonapi.Meta{
-			"total": metadata.TotalRecords,
-		}
+		(*manyPayload.Meta)["total"] = metadata.TotalRecords
 		return json.NewEncoder(w).Encode(manyPayload)
 	}
 	return jsonapi.ErrInvalidType
