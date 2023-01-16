@@ -70,8 +70,8 @@ func (app *application) writeHeaders(w http.ResponseWriter, status int, headers 
 	w.WriteHeader(status)
 }
 
-func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, data any, headers http.Header, metadata data.Metadata, typeData string) error {
-	app.writeHeaders(w, status, headers)
+func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, data any, metadata data.Metadata, typeData string) error {
+	app.writeHeaders(w, status, nil)
 	res, err := jsonapi.Marshal(data)
 	if err != nil {
 		return err

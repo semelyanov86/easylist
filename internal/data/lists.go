@@ -20,10 +20,12 @@ type List struct {
 	Link      Link      `jsonapi:"attr,link"`
 	Order     int32     `jsonapi:"attr,order"`
 	Version   int32     `json:"-"`
-	CreatedAt time.Time `jsonapi:"attr,created_at"`
-	UpdatedAt time.Time `jsonapi:"attr,updated_at"`
+	CreatedAt time.Time `jsonapi:"attr,created_at,iso8601"`
+	UpdatedAt time.Time `jsonapi:"attr,updated_at,iso8601"`
 	IsPublic  bool      `jsonapi:"attr,is_public,omitempty"`
 }
+
+type Lists []*List
 
 type ListModel struct {
 	DB *sql.DB
@@ -82,6 +84,41 @@ func (l ListModel) Insert(list *List) error {
 	list.Order = int32(lastOrder)
 
 	return nil
+}
+
+func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error) {
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, folder_id, name, icon, version, `order`, link, created_at, updated_at FROM lists WHERE lists.user_id = ? AND lists.folder_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var emptyMeta Metadata
+
+	rows, err := l.DB.QueryContext(ctx, query, userId, folderId, name, name, filters.limit(), filters.offset())
+	if err != nil {
+		return nil, emptyMeta, err
+	}
+
+	defer rows.Close()
+	var totalRecords = 0
+	var lists Lists
+
+	for rows.Next() {
+		var list List
+		err := rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+		if err != nil {
+			return nil, emptyMeta, err
+		}
+
+		lists = append(lists, &list)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, emptyMeta, err
+	}
+
+	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size)
+
+	return lists, metadata, nil
 }
 
 func (l ListModel) Get(id int64, userId int64) (*List, error) {
@@ -190,7 +227,22 @@ func ValidateList(v *validator.Validator, list *List) {
 
 func (list List) JSONAPILinks() *jsonapi.Links {
 	return &jsonapi.Links{
-		"self": fmt.Sprintf("/api/v1/lists/%d", list.ID),
+		"self": fmt.Sprintf("%s/api/v1/lists/%d", DomainName, list.ID),
+	}
+}
+
+func (lists Lists) JSONAPILinks() *jsonapi.Links {
+	return &jsonapi.Links{
+		jsonapi.KeyLastPage:     "",
+		jsonapi.KeyFirstPage:    "",
+		jsonapi.KeyPreviousPage: "",
+		jsonapi.KeyNextPage:     "",
+	}
+}
+
+func (lists Lists) JSONAPIMeta() *jsonapi.Meta {
+	return &jsonapi.Meta{
+		"total": 0,
 	}
 }
 
@@ -211,4 +263,8 @@ func (m MockListModel) Update(list *List, oldOrder int32) error {
 
 func (m MockListModel) Delete(id int64, userId int64) error {
 	return nil
+}
+
+func (m MockListModel) GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error) {
+	return nil, Metadata{}, nil
 }

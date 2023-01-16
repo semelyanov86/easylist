@@ -38,6 +38,7 @@ type Models struct {
 	Lists interface {
 		Insert(list *List) error
 		Get(id int64, userId int64) (*List, error)
+		GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error)
 		Update(list *List, oldOrder int32) error
 		Delete(id int64, userId int64) error
 	}

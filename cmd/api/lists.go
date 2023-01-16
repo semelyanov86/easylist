@@ -6,6 +6,7 @@ import (
 	"easylist/internal/validator"
 	"errors"
 	"fmt"
+	"github.com/google/jsonapi"
 	"github.com/google/uuid"
 	"net/http"
 	"strconv"
@@ -13,6 +14,11 @@ import (
 )
 
 const ListType = "lists"
+
+type ListInput struct {
+	Name string
+	data.Filters
+}
 
 func (app *application) createListsHandler(w http.ResponseWriter, r *http.Request) {
 	var list = new(data.List)
@@ -33,6 +39,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
 			v.AddError("data.attributes.folder_id", "this folder does not exists")
+			app.failedValidationResponse(w, r, v.Errors)
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
@@ -58,7 +65,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var headers = make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/api/v1/lists/%d", list.ID))
+	headers.Set("Location", fmt.Sprintf("%s/api/v1/lists/%d", app.config.domain, list.ID))
 
 	err = app.writeJSON(w, http.StatusCreated, list, headers)
 
@@ -67,15 +74,48 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (app *application) showListsHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) indexListsHandler(w http.ResponseWriter, r *http.Request) {
 	folderId, err := app.readIDParam(r)
 	if err != nil {
 		http.NotFound(w, r)
+	}
+
+	var v = validator.New()
+	var qs = r.URL.Query()
+	var input ListInput
+	var userModel = app.contextGetUser(r)
+
+	_, err = app.models.Folders.Get(folderId, userModel.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notPermittedResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
-	_, err = fmt.Fprintf(w, "showing all lists from folder %d\n", folderId)
+
+	input.Name = app.readString(qs, "filter[name]", "")
+	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
+	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "order")
+	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "-id", "-name", "-order", "-created_at", "-updated_at"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	lists, metadata, err := app.models.Lists.GetAll(folderId, input.Name, userModel.ID, input.Filters)
 	if err != nil {
-		panic(err)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeAndChangeJson(w, http.StatusOK, lists, metadata, ListType)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 	}
 }
 

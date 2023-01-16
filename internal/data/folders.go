@@ -20,8 +20,8 @@ type Folder struct {
 	Version   int32         `json:"-"`
 	Order     int32         `jsonapi:"attr,order"`
 	UserId    sql.NullInt64 `json:"-"`
-	CreatedAt time.Time     `jsonapi:"attr,created_at"`
-	UpdatedAt time.Time     `jsonapi:"attr,updated_at"`
+	CreatedAt time.Time     `jsonapi:"attr,created_at,iso8601"`
+	UpdatedAt time.Time     `jsonapi:"attr,updated_at,iso8601"`
 }
 
 type Folders []*Folder

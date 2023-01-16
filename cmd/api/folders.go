@@ -81,7 +81,7 @@ func (app *application) indexFoldersHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.writeAndChangeJson(w, http.StatusOK, folders, nil, metadata, data.FolderType)
+	err = app.writeAndChangeJson(w, http.StatusOK, folders, metadata, data.FolderType)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
