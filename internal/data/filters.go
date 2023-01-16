@@ -2,6 +2,7 @@ package data
 
 import (
 	"easylist/internal/validator"
+	"math"
 	"strings"
 )
 
@@ -10,6 +11,36 @@ type Filters struct {
 	Size         int
 	Sort         string
 	SortSafelist []string
+}
+
+type Metadata struct {
+	CurrentPage  int
+	PageSize     int
+	FirstPage    int
+	LastPage     int
+	TotalRecords int
+	NextPage     int
+	PrevPage     int
+}
+
+func calculateMetadata(totalRecords, page, pageSize int) Metadata {
+	if totalRecords == 0 {
+		return Metadata{}
+	}
+	var lastPage = int(math.Ceil(float64(totalRecords) / float64(pageSize)))
+	var nextPage = page + 1
+	if nextPage != lastPage {
+		nextPage = 0
+	}
+	return Metadata{
+		CurrentPage:  page,
+		PageSize:     pageSize,
+		FirstPage:    1,
+		LastPage:     lastPage,
+		TotalRecords: totalRecords,
+		NextPage:     nextPage,
+		PrevPage:     page - 1,
+	}
 }
 
 func (f Filters) sortColumn() string {

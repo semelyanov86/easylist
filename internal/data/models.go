@@ -32,7 +32,7 @@ type Models struct {
 		Get(id int64, userId int64) (*Folder, error)
 		Update(folder *Folder, oldOrder int32) error
 		Delete(id int64, userId int64) error
-		GetAll(name string, userId int64, filters Filters) ([]*Folder, error)
+		GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error)
 	}
 	Lists interface {
 		Insert(list *List) error

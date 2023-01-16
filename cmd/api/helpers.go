@@ -1,6 +1,7 @@
 package main
 
 import (
+	"easylist/internal/data"
 	"easylist/internal/validator"
 	"encoding/base64"
 	"encoding/json"
@@ -54,15 +55,46 @@ func (app *application) readFieldset(r *http.Request, typeData string) []string 
 }
 
 func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
+	app.writeHeaders(w, status, headers)
+	if err := jsonapi.MarshalPayload(w, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (app *application) writeHeaders(w http.ResponseWriter, status int, headers http.Header) {
 	w.Header().Set("Content-Type", jsonapi.MediaType)
 	for key, value := range headers {
 		w.Header()[key] = value
 	}
 	w.WriteHeader(status)
-	if err := jsonapi.MarshalPayload(w, data); err != nil {
+}
+
+func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, data any, headers http.Header, metadata data.Metadata, typeData string) error {
+	app.writeHeaders(w, status, headers)
+	res, err := jsonapi.Marshal(data)
+	if err != nil {
 		return err
 	}
-	return nil
+	if manyPayload, ok := res.(*jsonapi.ManyPayload); ok {
+		manyPayload.Links = &jsonapi.Links{
+			jsonapi.KeyFirstPage:    app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.FirstPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyPreviousPage: app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.PrevPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyNextPage:     app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.NextPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyLastPage:     app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.LastPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+		}
+		if metadata.NextPage == 0 {
+			(*manyPayload.Links)[jsonapi.KeyNextPage] = nil
+		}
+		if metadata.PrevPage == 0 {
+			(*manyPayload.Links)[jsonapi.KeyPreviousPage] = nil
+		}
+		manyPayload.Meta = &jsonapi.Meta{
+			"total": metadata.TotalRecords,
+		}
+		return json.NewEncoder(w).Encode(manyPayload)
+	}
+	return jsonapi.ErrInvalidType
 }
 
 func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/jsonapi"
-	_ "github.com/mfcochauxlaberge/jsonapi"
 	"strings"
 	"time"
 )
@@ -24,6 +23,8 @@ type Folder struct {
 	CreatedAt time.Time     `jsonapi:"attr,created_at"`
 	UpdatedAt time.Time     `jsonapi:"attr,updated_at"`
 }
+
+type Folders []*Folder
 
 type FolderModel struct {
 	DB *sql.DB
@@ -170,37 +171,42 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
-func (f FolderModel) GetAll(name string, userId int64, filters Filters) ([]*Folder, error) {
-	var query = fmt.Sprintf("SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", filters.sortColumn(), filters.sortDirection())
+func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error) {
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+	var emptyMeta Metadata
 
 	rows, err := f.DB.QueryContext(ctx, query, userId, name, name, filters.limit(), filters.offset())
 	if err != nil {
-		return nil, err
+		return nil, emptyMeta, err
 	}
 
 	defer rows.Close()
 
-	var folders = []*Folder{}
+	var totalRecords = 0
+
+	var folders Folders
 
 	for rows.Next() {
 		var folder Folder
 
-		err := rows.Scan(&folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+		err := rows.Scan(&totalRecords, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
 		if err != nil {
-			return nil, err
+			return nil, emptyMeta, err
 		}
 
 		folders = append(folders, &folder)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, emptyMeta, err
 	}
 
-	return folders, nil
+	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size)
+
+	return folders, metadata, nil
 }
 
 func ValidateFolder(v *validator.Validator, folder *Folder) {
@@ -212,6 +218,12 @@ func ValidateFolder(v *validator.Validator, folder *Folder) {
 func (folder Folder) JSONAPILinks() *jsonapi.Links {
 	return &jsonapi.Links{
 		"self": fmt.Sprintf("/api/v1/folders/%d", folder.ID),
+	}
+}
+
+func (folders Folders) JSONAPILinks() *jsonapi.Links {
+	return &jsonapi.Links{
+		jsonapi.KeyLastPage: "/api/v1/folders?page[number]=5&page[size]=5",
 	}
 }
 
@@ -234,6 +246,6 @@ func (m MockFolderModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
-func (m MockFolderModel) GetAll(name string, userId int64, filters Filters) ([]*Folder, error) {
-	return nil, nil
+func (m MockFolderModel) GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error) {
+	return nil, Metadata{}, nil
 }

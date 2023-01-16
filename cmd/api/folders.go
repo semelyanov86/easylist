@@ -75,13 +75,13 @@ func (app *application) indexFoldersHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	folders, err := app.models.Folders.GetAll(input.Name, userModel.ID, input.Filters)
+	folders, metadata, err := app.models.Folders.GetAll(input.Name, userModel.ID, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, folders, nil)
+	err = app.writeAndChangeJson(w, http.StatusOK, folders, nil, metadata, data.FolderType)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
