@@ -23,6 +23,7 @@ type List struct {
 	CreatedAt time.Time `jsonapi:"attr,created_at,iso8601"`
 	UpdatedAt time.Time `jsonapi:"attr,updated_at,iso8601"`
 	IsPublic  bool      `jsonapi:"attr,is_public,omitempty"`
+	Folder    *Folder   `jsonapi:"relation,folder,omitempty"`
 }
 
 type Lists []*List
@@ -87,7 +88,13 @@ func (l ListModel) Insert(list *List) error {
 }
 
 func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error) {
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, folder_id, name, icon, version, `order`, link, created_at, updated_at FROM lists WHERE lists.user_id = ? AND lists.folder_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", filters.sortColumn(), filters.sortDirection())
+	var joinFolder string
+	var fieldsFolder string
+	if Contains(filters.Includes, "folder") {
+		joinFolder = "INNER JOIN folders ON lists.folder_id = folders.id"
+		fieldsFolder = ", folders.id, folders.user_id, folders.name, folders.icon, folders.version, folders.order, folders.created_at, folders.updated_at"
+	}
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at%s FROM lists %s WHERE lists.user_id = ? AND lists.folder_id = ? AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, joinFolder, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -104,7 +111,13 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 
 	for rows.Next() {
 		var list List
-		err := rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+		var folder Folder
+		if Contains(filters.Includes, "folder") {
+			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+			list.Folder = &folder
+		} else {
+			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+		}
 		if err != nil {
 			return nil, emptyMeta, err
 		}

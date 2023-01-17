@@ -33,7 +33,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	if folderId == 0 {
 		folderId = 1
 	}
-	_, err := app.models.Folders.Get(folderId, userModel.ID)
+	folderModel, err := app.models.Folders.Get(folderId, userModel.ID)
 	var v = validator.New()
 	if err != nil {
 		switch {
@@ -52,6 +52,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	list.Version = 1
 	list.CreatedAt = time.Now()
 	list.UpdatedAt = time.Now()
+	list.Folder = folderModel
 
 	if data.ValidateList(v, list); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
@@ -101,6 +102,7 @@ func (app *application) indexListsHandler(w http.ResponseWriter, r *http.Request
 	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "order")
 	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "-id", "-name", "-order", "-created_at", "-updated_at"}
+	input.Filters.Includes = app.readCSV(qs, "include", []string{})
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
@@ -135,6 +137,21 @@ func (app *application) showListByIdHandler(w http.ResponseWriter, r *http.Reque
 			app.serverErrorResponse(w, r, err)
 		}
 		return
+	}
+	var qs = r.URL.Query()
+	var includes = app.readCSV(qs, "include", []string{})
+	if len(includes) > 0 && data.Contains(includes, "folder") {
+		folderModel, err := app.models.Folders.Get(list.FolderId, userModel.ID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.notFoundResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+		list.Folder = folderModel
 	}
 
 	err = app.writeJSON(w, http.StatusOK, list, nil)

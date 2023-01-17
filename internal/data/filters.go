@@ -11,6 +11,7 @@ type Filters struct {
 	Size         int
 	Sort         string
 	SortSafelist []string
+	Includes     []string
 }
 
 type Metadata struct {

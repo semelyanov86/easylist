@@ -102,6 +102,41 @@ func (f FolderModel) Get(id int64, userId int64) (*Folder, error) {
 	return &folder, nil
 }
 
+func (f FolderModel) GetByIds(ids []any) (Folders, error) {
+	var folders Folders
+	if len(ids) < 1 {
+		return folders, nil
+	}
+	var query = "SELECT id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.id IN (" + ConvertSliceToQuestionMarks(ids) + ")"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := f.DB.QueryContext(ctx, query, ids...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var totalRecords = 0
+
+	for rows.Next() {
+		var folder Folder
+
+		err := rows.Scan(&totalRecords, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		folders = append(folders, &folder)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return folders, nil
+}
+
 func (f FolderModel) Update(folder *Folder, oldOrder int32) error {
 	var _, err = f.DB.Exec("START TRANSACTION")
 	if err != nil {

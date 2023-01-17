@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -71,4 +72,22 @@ func NewMockModels() Models {
 		Lists:       MockListModel{},
 		Items:       MockItemModel{},
 	}
+}
+
+func ConvertSliceToQuestionMarks(ids []any) string {
+	var result string
+	for _, _ = range ids {
+		result = result + "?,"
+	}
+	return strings.Trim(result, ",")
+}
+
+func Contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }
