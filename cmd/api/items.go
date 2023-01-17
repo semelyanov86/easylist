@@ -5,12 +5,18 @@ import (
 	"easylist/internal/validator"
 	"errors"
 	"fmt"
+	"github.com/google/jsonapi"
 	"net/http"
 	"strconv"
 	"time"
 )
 
 const ItemType = "items"
+
+type ItemInput struct {
+	Name string
+	data.Filters
+}
 
 func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Request) {
 	var item = new(data.Item)
@@ -61,15 +67,38 @@ func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (app *application) showItemsHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) indexItemsHandler(w http.ResponseWriter, r *http.Request) {
 	listId, err := app.readIDParam(r)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	_, err = fmt.Fprintf(w, "showing all items of list %d\n", listId)
+	v := validator.New()
+	qs := r.URL.Query()
+	var input ItemInput
+	var userModel = app.contextGetUser(r)
+	input.Name = app.readString(qs, "filter[name]", "")
+	var isStarred = app.readBool(qs, "filter[is_starred]", false, v)
+	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
+	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "order")
+
+	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "quantity", "is_starred", "-id", "-name", "-order", "-created_at", "-updated_at", "-quantity", "-is_starred"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	items, metadata, err := app.models.Items.GetAll(input.Name, userModel.ID, listId, isStarred, input.Filters)
 	if err != nil {
-		panic(err)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeAndChangeJson(w, http.StatusOK, items, metadata, data.ItemsType)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 	}
 }
 

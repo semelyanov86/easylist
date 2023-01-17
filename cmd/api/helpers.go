@@ -212,3 +212,24 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 	return i
 }
+
+func (app *application) readBool(qs url.Values, key string, defaultValue bool, v *validator.Validator) bool {
+	var s = qs.Get(key)
+
+	if s == "" {
+		return defaultValue
+	}
+	switch s {
+	case "false":
+		return false
+	case "true":
+		return true
+	case "1":
+		return true
+	case "0":
+		return false
+	}
+
+	v.AddError(key, "must be an integer value")
+	return defaultValue
+}

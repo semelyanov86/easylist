@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"easylist/internal/validator"
 	"errors"
+	"fmt"
+	"github.com/google/jsonapi"
 	"os"
 	"time"
 )
@@ -22,9 +24,13 @@ type Item struct {
 	File         string    `jsonapi:"attr,file"`
 	Order        int32     `jsonapi:"attr,order"`
 	Version      int32     `json:"-"`
-	CreatedAt    time.Time `jsonapi:"attr,created_at"`
-	UpdatedAt    time.Time `jsonapi:"attr,updated_at"`
+	CreatedAt    time.Time `jsonapi:"attr,created_at,iso8601"`
+	UpdatedAt    time.Time `jsonapi:"attr,updated_at,iso8601"`
 }
+
+const ItemsType = "items"
+
+type Items []*Item
 
 type ItemModel struct {
 	DB *sql.DB
@@ -192,6 +198,65 @@ func (i ItemModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
+func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error) {
+	var starredFilter = ""
+	if isStarred {
+		starredFilter = "AND items.is_starred = 1"
+	}
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, created_at, updated_at FROM items WHERE items.user_id = ? AND items.list_id = ? %s AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", starredFilter, filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var emptyMeta Metadata
+
+	rows, err := i.DB.QueryContext(ctx, query, userId, listId, name, name, filters.limit(), filters.offset())
+	if err != nil {
+		return nil, emptyMeta, err
+	}
+	defer rows.Close()
+	var totalRecords = 0
+	var items Items
+
+	for rows.Next() {
+		var item Item
+		err := rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt)
+		if err != nil {
+			return nil, emptyMeta, err
+		}
+
+		items = append(items, &item)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, emptyMeta, err
+	}
+
+	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size)
+
+	return items, metadata, nil
+}
+
+func (item Item) JSONAPILinks() *jsonapi.Links {
+	return &jsonapi.Links{
+		"self": fmt.Sprintf("%s/api/v1/items/%d", DomainName, item.ID),
+	}
+}
+
+func (items Items) JSONAPILinks() *jsonapi.Links {
+	return &jsonapi.Links{
+		jsonapi.KeyLastPage:     "",
+		jsonapi.KeyFirstPage:    "",
+		jsonapi.KeyNextPage:     "",
+		jsonapi.KeyPreviousPage: "",
+	}
+}
+
+func (items Items) JSONAPIMeta() *jsonapi.Meta {
+	return &jsonapi.Meta{
+		"total": 0,
+	}
+}
+
 func ValidateItem(v *validator.Validator, item *Item) {
 	v.Check(item.Name != "", "data.attributes.name", "must be provided")
 	v.Check(len(item.Name) <= 190, "data.attributes.name", "must be no more than 190 characters")
@@ -222,4 +287,8 @@ func (i MockItemModel) Update(item *Item, oldOrder int32) error {
 
 func (i MockItemModel) Delete(id int64, userId int64) error {
 	return nil
+}
+
+func (i MockItemModel) GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error) {
+	return Items{}, Metadata{}, nil
 }

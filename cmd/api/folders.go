@@ -49,7 +49,7 @@ func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	var headers = make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/api/v1/folders/%d", folder.ID))
+	headers.Set("Location", fmt.Sprintf("%s/api/v1/folders/%d", app.config.domain, folder.ID))
 
 	err = app.writeJSON(w, http.StatusCreated, folder, headers)
 

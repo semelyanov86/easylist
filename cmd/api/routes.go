@@ -29,7 +29,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/api/v1/lists/:id", app.requirePermission("lists:write", app.updateListHandler))
 	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:id", app.requirePermission("lists:write", app.deleteListHandler))
 
-	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id/items", app.requirePermission("items:read", app.showItemsHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:id/items", app.requirePermission("items:read", app.indexItemsHandler))
 	router.HandlerFunc(http.MethodGet, "/api/v1/items/:id", app.requirePermission("items:read", app.showItemByIdHandler))
 	router.HandlerFunc(http.MethodPost, "/api/v1/items", app.requirePermission("items:write", app.createItemsHandler))
 	router.HandlerFunc(http.MethodPatch, "/api/v1/items/:id", app.requirePermission("items:write", app.updateItemHandler))
