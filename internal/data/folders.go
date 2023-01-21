@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/jsonapi"
-	"github.com/octoper/go-ray"
 	"strings"
 	"time"
 )
@@ -260,7 +259,7 @@ func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders
 				}
 			}
 			var tempTags []List
-			ray.Ray(parsedList.String)
+
 			if parsedList.Valid {
 				if err := json.Unmarshal([]byte(parsedList.String), &tempTags); err != nil {
 					return nil, emptyMeta, err
