@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"github.com/liamylian/jsontime"
 	"strings"
 	"time"
 )
@@ -12,6 +13,8 @@ var (
 	ErrEditConflict   = errors.New("edit conflict")
 	DomainName        string
 )
+
+var json = jsontime.ConfigWithCustomTimeFormat
 
 type Models struct {
 	Users interface {

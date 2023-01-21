@@ -67,6 +67,7 @@ func (app *application) indexFoldersHandler(w http.ResponseWriter, r *http.Reque
 	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
 	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "order")
+	input.Filters.Includes = app.readCSV(qs, "include", []string{})
 
 	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "-id", "-name", "-order", "-created_at", "-updated_at"}
 
@@ -103,6 +104,18 @@ func (app *application) showFolderByIdHandler(w http.ResponseWriter, r *http.Req
 			app.serverErrorResponse(w, r, err)
 		}
 		return
+	}
+
+	var qs = r.URL.Query()
+	var includes = app.readCSV(qs, "include", []string{})
+	if len(includes) > 0 && data.Contains(includes, "lists") {
+		lists, _, err := app.models.Lists.GetAll(folder.ID, "", userModel.ID, data.GetDefaultFilterInstance())
+
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		folder.Lists = lists
 	}
 	err = app.writeJSON(w, http.StatusOK, folder, nil)
 	if err != nil {

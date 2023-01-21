@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/jsonapi"
+	"github.com/octoper/go-ray"
 	"strings"
 	"time"
 )
@@ -22,6 +23,7 @@ type Folder struct {
 	UserId    sql.NullInt64 `json:"-"`
 	CreatedAt time.Time     `jsonapi:"attr,created_at,iso8601"`
 	UpdatedAt time.Time     `jsonapi:"attr,updated_at,iso8601"`
+	Lists     Lists         `jsonapi:"relation,lists,omitempty"`
 }
 
 type Folders []*Folder
@@ -207,7 +209,15 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 }
 
 func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error) {
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, name, icon, version, `order`, created_at, updated_at FROM folders WHERE folders.user_id = ? AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", filters.sortColumn(), filters.sortDirection())
+	var joinList string
+	var fieldsList string
+	var groupList string
+	if Contains(filters.Includes, "lists") {
+		joinList = "LEFT JOIN lists ON lists.folder_id = folders.id"
+		fieldsList = ", (SELECT CONCAT('[',GROUP_CONCAT(JSON_OBJECT('id', lists.id, 'user_id', lists.user_id, 'FolderId', lists.folder_id, 'name', lists.name, 'icon', lists.icon, 'version', lists.version, 'order', lists.order, 'link', lists.link, 'created_at', lists.created_at, 'updated_at', lists.updated_at)),']')) as parsed_lists"
+		groupList = "GROUP BY folders.id"
+	}
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), folders.id, folders.user_id, folders.name, folders.icon, folders.version, folders.order, folders.created_at, folders.updated_at%s FROM folders %s WHERE (folders.user_id = ? OR folders.user_id IS NULL) AND (MATCH(folders.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') %s ORDER BY folders.%s %s, folders.order ASC LIMIT ? OFFSET ?", fieldsList, joinList, groupList, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -223,16 +233,65 @@ func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders
 	var totalRecords = 0
 
 	var folders Folders
+	var currentFolder Folder
 
 	for rows.Next() {
 		var folder Folder
+		var folderId, folderUserId sql.NullInt64
+		var folderName, folderIcon, parsedList sql.NullString
+		var folderVersion, folderOrder sql.NullInt32
+		var folderCreatedAt, folderUpdatedAt sql.NullTime
 
-		err := rows.Scan(&totalRecords, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
-		if err != nil {
-			return nil, emptyMeta, err
+		if Contains(filters.Includes, "lists") {
+			err = rows.Scan(&totalRecords, &folderId, &folderUserId, &folderName, &folderIcon, &folderVersion, &folderOrder, &folderCreatedAt, &folderUpdatedAt, &parsedList)
+			if err != nil {
+				return nil, emptyMeta, err
+			}
+			if currentFolder.ID != folderId.Int64 {
+				currentFolder = Folder{
+					ID:        folderId.Int64,
+					Name:      folderName.String,
+					Icon:      folderIcon.String,
+					Version:   folderVersion.Int32,
+					Order:     folderOrder.Int32,
+					UserId:    folderUserId,
+					CreatedAt: folderCreatedAt.Time,
+					UpdatedAt: folderUpdatedAt.Time,
+				}
+			}
+			var tempTags []List
+			ray.Ray(parsedList.String)
+			if parsedList.Valid {
+				if err := json.Unmarshal([]byte(parsedList.String), &tempTags); err != nil {
+					return nil, emptyMeta, err
+				}
+				for _, curList := range tempTags {
+					if curList.ID > 0 {
+						var importList = curList
+						currentFolder.Lists = append(currentFolder.Lists, &importList)
+					}
+				}
+			}
+
+			folder = currentFolder
+			folders = append(folders, &folder)
+		} else {
+			err = rows.Scan(
+				&totalRecords,
+				&folder.ID,
+				&folder.UserId,
+				&folder.Name,
+				&folder.Icon,
+				&folder.Version,
+				&folder.Order,
+				&folder.CreatedAt,
+				&folder.UpdatedAt,
+			)
+			if err != nil {
+				return nil, emptyMeta, err
+			}
+			folders = append(folders, &folder)
 		}
-
-		folders = append(folders, &folder)
 	}
 
 	if err = rows.Err(); err != nil {

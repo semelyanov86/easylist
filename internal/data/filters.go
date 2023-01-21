@@ -75,3 +75,12 @@ func ValidateFilters(v *validator.Validator, f Filters) {
 	v.Check(f.Size <= 200, "page[size]", "must be a maximum 200")
 	v.Check(validator.In(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
 }
+
+func GetDefaultFilterInstance() Filters {
+	return Filters{
+		Sort:         "id",
+		SortSafelist: []string{"id"},
+		Page:         1,
+		Size:         100,
+	}
+}

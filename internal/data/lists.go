@@ -20,8 +20,8 @@ type List struct {
 	Link      Link      `jsonapi:"attr,link"`
 	Order     int32     `jsonapi:"attr,order"`
 	Version   int32     `json:"-"`
-	CreatedAt time.Time `jsonapi:"attr,created_at,iso8601"`
-	UpdatedAt time.Time `jsonapi:"attr,updated_at,iso8601"`
+	CreatedAt time.Time `jsonapi:"attr,created_at,iso8601" json:"created_at" time_format:"sql_datetime"`
+	UpdatedAt time.Time `jsonapi:"attr,updated_at,iso8601" json:"updated_at" time_format:"sql_datetime"`
 	IsPublic  bool      `jsonapi:"attr,is_public,omitempty"`
 	Folder    *Folder   `jsonapi:"relation,folder,omitempty"`
 }
