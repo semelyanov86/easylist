@@ -26,6 +26,7 @@ type Item struct {
 	Version      int32     `json:"-"`
 	CreatedAt    time.Time `jsonapi:"attr,created_at,iso8601" json:"created_at" time_format:"sql_datetime"`
 	UpdatedAt    time.Time `jsonapi:"attr,updated_at,iso8601" json:"updated_at" time_format:"sql_datetime"`
+	List         *List     `jsonapi:"relation,list,omitempty"`
 }
 
 const ItemsType = "items"
@@ -199,11 +200,17 @@ func (i ItemModel) Delete(id int64, userId int64) error {
 }
 
 func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error) {
+	var joinList string
+	var fieldsList string
 	var starredFilter = ""
 	if isStarred {
 		starredFilter = "AND items.is_starred = 1"
 	}
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, created_at, updated_at FROM items WHERE items.user_id = ? AND (items.list_id = ? OR ? = 0) %s AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", starredFilter, filters.sortColumn(), filters.sortDirection())
+	if Contains(filters.Includes, "list") {
+		joinList = "INNER JOIN lists ON items.list_id = lists.id"
+		fieldsList = ", lists.id, lists.folder_id, lists.user_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at"
+	}
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), items.id, items.user_id, items.list_id, items.name, items.description, items.quantity, items.quantity_type, items.price, items.is_starred, items.file, items.version, items.order, items.created_at, items.updated_at%s FROM items %s WHERE items.user_id = ? AND (items.list_id = ? OR ? = 0) %s AND (MATCH(items.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY items.%s %s, items.order ASC LIMIT ? OFFSET ?", fieldsList, joinList, starredFilter, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -218,8 +225,14 @@ func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred boo
 	var items Items
 
 	for rows.Next() {
+		var list List
 		var item Item
-		err := rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt)
+		if Contains(filters.Includes, "list") {
+			err = rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+			item.List = &list
+		} else {
+			err = rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt)
+		}
 		if err != nil {
 			return nil, emptyMeta, err
 		}

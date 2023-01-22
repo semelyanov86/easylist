@@ -82,6 +82,7 @@ func (app *application) indexItemsHandler(w http.ResponseWriter, r *http.Request
 	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
 	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "order")
+	input.Filters.Includes = app.readCSV(qs, "include", []string{})
 
 	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "quantity", "is_starred", "-id", "-name", "-order", "-created_at", "-updated_at", "-quantity", "-is_starred"}
 
@@ -118,6 +119,22 @@ func (app *application) showItemByIdHandler(w http.ResponseWriter, r *http.Reque
 			app.serverErrorResponse(w, r, err)
 		}
 		return
+	}
+
+	var qs = r.URL.Query()
+	var includes = app.readCSV(qs, "include", []string{})
+	if len(includes) > 0 && data.Contains(includes, "list") {
+		listModel, err := app.models.Lists.Get(item.ListId, userModel.ID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.notFoundResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+		item.List = listModel
 	}
 
 	err = app.writeJSON(w, http.StatusOK, item, nil)

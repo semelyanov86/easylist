@@ -1,8 +1,66 @@
 _type: export
 __export_format: 4
-__export_date: 2023-01-05T16:59:51.752Z
+__export_date: 2023-01-22T12:56:48.047Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
+  - _id: req_6b0bdf5ec9f34ea99849f7f2e2b8a247
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1673082097151
+    created: 1672938508326
+    url: "{{ _.URL }}tokens/authentication"
+    name: Authentication
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "tokens",
+            "attributes": {
+              "email": "emelyanov86@km.ru",
+        			"password": "1qaz2wsx3edc"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_4bfd142269004be3aa3d3aeb090eeb29
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_110cd623399c4e8193f19e6d2bad0380
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1672938508326
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672833886665
+    created: 1672833886665
+    name: Users
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672833886666
+    _type: request_group
+  - _id: wrk_074fff2091894028b24cd3a631beb9fa
+    parentId: null
+    modified: 1672645019681
+    created: 1672645019681
+    name: Easy List
+    description: ""
+    scope: collection
+    _type: workspace
   - _id: req_97fd2b5ba6b14de3b7015acf58e45848
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
     modified: 1672937404907
@@ -42,27 +100,9 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672833886665
-    created: 1672833886665
-    name: Users
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672833886666
-    _type: request_group
-  - _id: wrk_074fff2091894028b24cd3a631beb9fa
-    parentId: null
-    modified: 1672645019681
-    created: 1672645019681
-    name: Easy List
-    description: ""
-    scope: collection
-    _type: workspace
   - _id: req_e1b659979fe94904b50e7c3be717d1fa
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1672937902063
+    modified: 1673014954517
     created: 1672833891583
     url: "{{ _.URL }}users"
     name: Registration
@@ -75,8 +115,8 @@ resources:
           "data": {
             "type": "users",
             "attributes": {
-              "name": "Test user 2020",
-              "email": "test2020@mail.ru",
+              "name": "Sergey Emelyanov",
+              "email": "emelyanov86@km.ru",
         			"password": "1qaz2wsx3edc"
             }
           }
@@ -101,27 +141,29 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: req_79e2d0a481954582a7ae5dc81e924087
+  - _id: req_191686c45b834cb0b9692a27ee264ce4
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1672833913382
-    created: 1672668455456
-    url: "{{ _.URL }}items/3"
-    name: Get Item By Id
-    description: Retrieve item by ID from DB
-    method: GET
+    modified: 1674391882257
+    created: 1673247224856
+    url: "{{ _.URL }}items/9"
+    name: Delete Item
+    description: Delete an item, using item ID. Returning 204 No content
+    method: DELETE
     body: {}
     parameters: []
     headers:
-      - id: pair_03b64936a35b4be3914419dd3f4aeed1
+      - id: pair_d1fd41f526024466a1cc0314d667079c
         name: Accept
         value: application/vnd.api+json
         description: ""
-      - id: pair_b6a691b95e7b401398725502ca439b05
+      - id: pair_c375bb2938404505a25b3a6449a1f8e0
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
-    metaSortKey: -1672668455456
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673247224856
     isPrivate: false
     settingStoreCookies: true
     settingSendCookies: true
@@ -140,28 +182,206 @@ resources:
     environmentPropertyOrder: null
     metaSortKey: -1672648793301
     _type: request_group
-  - _id: req_18b2d3de6a0d489db7895b5465d21d21
+  - _id: req_8b0eab8f5a3144f591b397e32093a915
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1672833934196
-    created: 1672648901307
-    url: "{{ _.URL }}items"
-    name: Create new item
-    description: Create new item
-    method: POST
+    modified: 1674391879592
+    created: 1673206446152
+    url: "{{ _.URL }}items/10"
+    name: Update Item
+    description: >-
+      Updating an Item. Example request:
+
+      ```json
+
+      {
+        "data": {
+      		"id": "3",
+          "type": "items",
+          "attributes": {
+            "name": "Zuccini",
+            "description": "Super Zuccini",
+      			"list_id": 3,
+      			"file": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          }
+        }
+      }
+
+      ```
+
+
+      Note, that you can pass not all fields. We have partial update here.
+
+
+      Example response:
+
+      ```json
+
+      {
+      	"data": {
+      		"id": "3",
+      		"type": "lists",
+      		"attributes": {
+      			"list_id": 3,
+      			"name": "Zuccini",
+      			"description": "Super Zuccini",
+      			"quantity": 2,
+      			"quantity_type": "piece",
+      			"price": 0,
+      			"is_starred": false,
+      			"file": "storage/covers/27/033fac29-7cd4-4923-9af2-651364e187c7.jpg",
+      			"order": 3
+      		}
+      	}
+      }
+
+      ```
+    method: PATCH
     body:
       mimeType: application/json
       text: |-
         {
           "data": {
+        		"id": "10",
             "type": "items",
             "attributes": {
-              "name": "Ember Hamster",
-              "description": "http://example.com/images/productivity.png",
+              "name": "Kolbasa doktorskaya",
+              "description": "For olivye sec"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_b41af71853a34ed9817b4dab7eda9413
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_035c1d2532a94cec9f86177ec03a0fd4
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673206446152
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_79e2d0a481954582a7ae5dc81e924087
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1674391876862
+    created: 1672668455456
+    url: "{{ _.URL }}items/3"
+    name: Get Item By Id
+    description: |-
+      Retrieve item by ID from DB.
+
+      Available includes:
+      * list
+
+      Example response:
+      ```json
+      {
+      	"data": {
+      		"id": "4",
+      		"type": "items",
+      		"attributes": {
+      			"list_id": 3,
+      			"name": "Salat",
+      			"description": "",
+      			"quantity": 1,
+      			"quantity_type": "piece",
+      			"price": 0,
+      			"is_starred": false,
+      			"file": "",
+      			"order": 4
+      		}
+      	}
+      }
+      ```
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_1f08fd04b43e4430962d01de9548ccf5
+        name: include
+        value: list
+        description: ""
+    headers:
+      - id: pair_03b64936a35b4be3914419dd3f4aeed1
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_b6a691b95e7b401398725502ca439b05
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1672668455456
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_18b2d3de6a0d489db7895b5465d21d21
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1674391852656
+    created: 1672648901307
+    url: "{{ _.URL }}items"
+    name: Create new item
+    description: >-
+      Create new item
+
+
+      Example request:
+
+
+      ```json
+
+      {
+        "data": {
+          "type": "items",
+          "attributes": {
+            "name": "Kapusta",
+            "description": "Super kapusta",
+      			"quantity": 0,
+      			"quantity_type": "piece",
+      			"price": 0,
+      			"is_starred": false,
+      			"list_id": 3,
+      			"file": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+          }
+        }
+      }
+
+      ```
+
+
+      As a result of saving operation we get a item object with status 201
+    method: POST
+    body:
+      mimeType: application/json
+      text: >-
+        {
+          "data": {
+            "type": "items",
+            "attributes": {
+              "name": "Kolbasa",
+              "description": "For salad",
         			"quantity": 1,
-        			"quantity_type": "kg",
-        			"price": 200,
+        			"quantity_type": "piece",
+        			"price": 12,
         			"is_starred": false,
-        			"list_id": 2
+        			"list_id": 3,
+        			"file": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
             }
           }
         }
@@ -175,7 +395,9 @@ resources:
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
     metaSortKey: -1672648901307
     isPrivate: false
     settingStoreCookies: true
@@ -187,14 +409,144 @@ resources:
     _type: request
   - _id: req_744cc286181947d3a84689afa98156ae
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1672668491667
+    modified: 1674391819537
     created: 1672648797363
-    url: "{{ _.URL }}lists/1/items"
-    name: Get All Items
-    description: Getting all items from specific list
+    url: "{{ _.URL }}lists/3/items"
+    name: Get All Items From List
+    description: >-
+      Getting all items from specific list
+
+
+      Available the same filters and includes, as in Get All Items route.
+
+
+      Example response
+
+      ```json
+
+      {
+      	"data": [
+      		{
+      			"type": "items",
+      			"id": "1",
+      			"attributes": {
+      				"created_at": "2023-01-08T14:08:03Z",
+      				"description": "Super Kapusta",
+      				"file": "",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Kapusta Green",
+      				"order": 1,
+      				"price": 200,
+      				"quantity": 1,
+      				"quantity_type": "kg",
+      				"updated_at": "2023-01-08T20:37:28Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/1"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "2",
+      			"attributes": {
+      				"created_at": "2023-01-08T14:12:36Z",
+      				"description": "Super Potato desc",
+      				"file": "./storage/covers/27/ef4b5c41-3adc-43fb-b40d-cd4f4f4db68c.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Potato White",
+      				"order": 2,
+      				"price": 0,
+      				"quantity": 0,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-08T20:35:59Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/2"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "3",
+      			"attributes": {
+      				"created_at": "2023-01-08T20:38:47Z",
+      				"description": "Super Zuccini",
+      				"file": "storage/covers/27/033fac29-7cd4-4923-9af2-651364e187c7.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Zuccini",
+      				"order": 3,
+      				"price": 0,
+      				"quantity": 2,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-08T20:41:38Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/3"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "4",
+      			"attributes": {
+      				"created_at": "2023-01-08T20:48:41Z",
+      				"description": "sfsadfdasfds",
+      				"file": "storage/covers/27/033fac29-7cd4-4923-9af2-651364e187c7.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Salat",
+      				"order": 4,
+      				"price": 0,
+      				"quantity": 1,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-08T20:48:41Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/4"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "10",
+      			"attributes": {
+      				"created_at": "2023-01-14T13:27:58Z",
+      				"description": "For olivye sec",
+      				"file": "storage/covers/27/f282cf01-4902-4b66-8e06-8ae450729324.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Kolbasa doktorskaya",
+      				"order": 5,
+      				"price": 12,
+      				"quantity": 1,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-14T14:36:58Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/10"
+      			}
+      		}
+      	],
+      	"links": {
+      		"first": "http://easylist.sergeyem.ru/api/v1/items?page[number]=1&page[size]=20",
+      		"last": "http://easylist.sergeyem.ru/api/v1/items?page[number]=1&page[size]=20",
+      		"next": null,
+      		"prev": null
+      	},
+      	"meta": {
+      		"total": 5
+      	}
+      }
+
+      ```
     method: GET
     body: {}
-    parameters: []
+    parameters:
+      - id: pair_eed1272c043b46dbaeba3c0f68d232f2
+        name: filter[name]
+        value: Kapusta
+        description: ""
+        disabled: true
     headers:
       - id: pair_b5375585c22442e4ad644b0c01455729
         name: Accept
@@ -204,7 +556,9 @@ resources:
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
     metaSortKey: -1672648797363
     isPrivate: false
     settingStoreCookies: true
@@ -214,27 +568,220 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: req_6bca7a9caa704b78ba086b79ebe384f4
-    parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1672667718281
-    created: 1672667671476
-    url: "{{ _.URL }}lists/2"
-    name: Get List By Id
-    description: Retrieve list data by id
+  - _id: req_708c51a16e4b4e4281c5fc05af364416
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1674391885562
+    created: 1674375350438
+    url: "{{ _.URL }}items"
+    name: Get All Items
+    description: >-
+      Getting all items assigned to auth user
+
+
+      Available includes:
+
+      * list - attached related lists
+
+
+      Available filters:
+
+      * filter[name]
+
+
+      Available sorts:
+
+      * name
+
+      * id
+
+      * order
+
+      * created_at
+
+      * updated_at
+
+      * quantity
+
+
+      Default sorting field is `order`
+
+
+      Example response:
+
+      ```json
+
+      {
+      	"data": [
+      		{
+      			"type": "items",
+      			"id": "1",
+      			"attributes": {
+      				"created_at": "2023-01-08T14:08:03Z",
+      				"description": "Super Kapusta",
+      				"file": "",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Kapusta Green",
+      				"order": 1,
+      				"price": 200,
+      				"quantity": 1,
+      				"quantity_type": "kg",
+      				"updated_at": "2023-01-08T20:37:28Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/1"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "2",
+      			"attributes": {
+      				"created_at": "2023-01-08T14:12:36Z",
+      				"description": "Super Potato desc",
+      				"file": "./storage/covers/27/ef4b5c41-3adc-43fb-b40d-cd4f4f4db68c.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Potato White",
+      				"order": 2,
+      				"price": 0,
+      				"quantity": 0,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-08T20:35:59Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/2"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "3",
+      			"attributes": {
+      				"created_at": "2023-01-08T20:38:47Z",
+      				"description": "Super Zuccini",
+      				"file": "storage/covers/27/033fac29-7cd4-4923-9af2-651364e187c7.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Zuccini",
+      				"order": 3,
+      				"price": 0,
+      				"quantity": 2,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-08T20:41:38Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/3"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "4",
+      			"attributes": {
+      				"created_at": "2023-01-08T20:48:41Z",
+      				"description": "sfsadfdasfds",
+      				"file": "storage/covers/27/033fac29-7cd4-4923-9af2-651364e187c7.jpg",
+      				"is_starred": false,
+      				"list_id": 3,
+      				"name": "Salat",
+      				"order": 4,
+      				"price": 0,
+      				"quantity": 1,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-08T20:48:41Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/4"
+      			}
+      		},
+      		{
+      			"type": "items",
+      			"id": "10",
+      			"attributes": {
+      				"created_at": "2023-01-14T13:27:58Z",
+      				"description": "For olivye sec",
+      				"file": "storage/covers/27/f282cf01-4902-4b66-8e06-8ae450729324.jpg",
+      				"is_starred": false,
+      				"list_id": 4,
+      				"name": "Kolbasa doktorskaya",
+      				"order": 5,
+      				"price": 12,
+      				"quantity": 1,
+      				"quantity_type": "piece",
+      				"updated_at": "2023-01-14T14:36:58Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/items/10"
+      			}
+      		}
+      	],
+      	"links": {
+      		"first": "http://easylist.sergeyem.ru/api/v1/items?page[number]=1&page[size]=20",
+      		"last": "http://easylist.sergeyem.ru/api/v1/items?page[number]=1&page[size]=20",
+      		"next": null,
+      		"prev": null
+      	},
+      	"meta": {
+      		"total": 5
+      	}
+      }
+
+      ```
     method: GET
     body: {}
-    parameters: []
+    parameters:
+      - id: pair_eed1272c043b46dbaeba3c0f68d232f2
+        name: filter[name]
+        value: Kapusta
+        description: ""
+        disabled: true
+      - id: pair_8a8c26d114904cd095053605a4ed3a83
+        name: include
+        value: list
+        description: ""
+        disabled: true
     headers:
-      - id: pair_36a1163e000349bda92523f1a8e93e3e
+      - id: pair_b5375585c22442e4ad644b0c01455729
         name: Accept
         value: application/vnd.api+json
         description: ""
-      - id: pair_a0bba7501395465ba375198c211da587
+      - id: pair_69d7230b38b0485ba9c4d9267a1719c4
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
-    metaSortKey: -1672667671476
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1672648742193.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_d8da19385a664806b00f65637c1e8bb2
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1674391905003
+    created: 1673695884076
+    url: "{{ _.URL }}lists/4"
+    name: Delete List
+    description: Fully deleting specific list with all items in it
+    method: DELETE
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_8603b36e124f4558995e04f3810d80fd
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_0f24c860f4044a1cb559a4cf0db8d141
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673695884076
     isPrivate: false
     settingStoreCookies: true
     settingSendCookies: true
@@ -253,13 +800,153 @@ resources:
     environmentPropertyOrder: null
     metaSortKey: -1672648583913
     _type: request_group
+  - _id: req_ff95b00c61b04a88bf9c27f9277603d0
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1674391917073
+    created: 1673168379532
+    url: "{{ _.URL }}lists/8"
+    name: Update List
+    description: |-
+      Update folder.
+
+      Example request:
+      ```json
+      {
+        "data": {
+      		"id": "2",
+          "type": "lists",
+          "attributes": {
+            "name": "Soupe Sec",
+            "icon": "fa-list",
+      			"folder_id": 5,
+      			"order": 1,
+      			"is_public": false
+          }
+        }
+      }
+      ```
+    method: PATCH
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+        		"id": "8",
+            "type": "lists",
+            "attributes": {
+              "is_public": true
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_74edf93fd76e4fe4a3f5db9179d2a7fd
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_4ba18361aa5746d1826871aeccf6a444
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673168379532
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_6bca7a9caa704b78ba086b79ebe384f4
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1674391961143
+    created: 1672667671476
+    url: "{{ _.URL }}lists/2"
+    name: Get List By Id
+    description: |-
+      Retrieve list data by id
+
+      Available includes:
+      * folder
+      * items
+
+      Example response:
+      ```json
+      {
+      	"data": {
+      		"type": "lists",
+      		"id": "2",
+      		"attributes": {
+      			"created_at": "2023-01-08T08:28:38Z",
+      			"folder_id": 5,
+      			"icon": "fa-list",
+      			"link": "e4081b8c-b865-4573-9dcf-d1631c7fd092",
+      			"name": "Kompot Sec",
+      			"order": 3,
+      			"updated_at": "2023-01-08T10:15:49Z"
+      		},
+      		"links": {
+      			"self": "http://easylist.sergeyem.ru/api/v1/lists/2"
+      		}
+      	}
+      }
+      ```
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_746a4f5c5ea54af3b7bf48b1156afb4e
+        name: include
+        value: folder
+        description: ""
+        disabled: true
+    headers:
+      - id: pair_36a1163e000349bda92523f1a8e93e3e
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_a0bba7501395465ba375198c211da587
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1672667671476
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
   - _id: req_ba478905ec2c40019de5569ff733584d
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1672735498818
+    modified: 1674392003567
     created: 1672648687024
     url: "{{ _.URL }}lists"
     name: Create new list
-    description: Create a new list
+    description: |-
+      Create a new list
+
+      Example request:
+      ```json
+      {
+        "data": {
+          "type": "lists",
+          "attributes": {
+            "name": "Some technic",
+            "icon": "fa-list",
+      			"folder_id": 8
+          }
+        }
+      }
+      ```
+
+      As a result of create operation we get a list object with status 201
     method: POST
     body:
       mimeType: application/json
@@ -268,9 +955,9 @@ resources:
           "data": {
             "type": "lists",
             "attributes": {
-              "name": "Ember Hamster",
+              "name": "Some technic",
               "icon": "fa-list",
-        			"folder_id": 1
+        			"folder_id": 8
             }
           }
         }
@@ -284,7 +971,9 @@ resources:
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
     metaSortKey: -1672648687024
     isPrivate: false
     settingStoreCookies: true
@@ -296,14 +985,132 @@ resources:
     _type: request
   - _id: req_f77d688c59f84db7a7e184a24fd4f1da
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1672667695778
+    modified: 1674392150472
     created: 1672648590768
-    url: "{{ _.URL }}folders/1/lists"
-    name: Get Lists
-    description: Show all lists from specific folder
+    url: "{{ _.URL }}folders/5/lists"
+    name: Get Lists From Folder
+    description: >-
+      Show all lists from specific folder
+
+
+      Supported includes:
+
+      * folder
+
+      * items
+
+
+      Supported filters:
+
+      * name
+
+
+      Supported sorting (by default is order):
+
+      * id
+
+      * name
+
+      * order
+
+      * created_at
+
+      * updated_at
+
+      * folder_id
+
+
+      Example response:
+
+
+      ```json
+
+      {
+      	"data": [
+      		{
+      			"type": "lists",
+      			"id": "3",
+      			"attributes": {
+      				"created_at": "2023-01-08T09:02:17Z",
+      				"folder_id": 5,
+      				"icon": "fa-list",
+      				"link": "c3074054-880a-4a12-8b5e-47c52a9581d0",
+      				"name": "Soupe Schi",
+      				"order": 1,
+      				"updated_at": "2023-01-14T09:40:44Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/lists/3"
+      			}
+      		},
+      		{
+      			"type": "lists",
+      			"id": "2",
+      			"attributes": {
+      				"created_at": "2023-01-08T08:28:38Z",
+      				"folder_id": 5,
+      				"icon": "fa-list",
+      				"link": "e4081b8c-b865-4573-9dcf-d1631c7fd092",
+      				"name": "Kompot Sec",
+      				"order": 3,
+      				"updated_at": "2023-01-08T10:15:49Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/lists/2"
+      			}
+      		},
+      		{
+      			"type": "lists",
+      			"id": "4",
+      			"attributes": {
+      				"created_at": "2023-01-14T08:55:24Z",
+      				"folder_id": 5,
+      				"icon": "fa-list",
+      				"link": null,
+      				"name": "Pure",
+      				"order": 4,
+      				"updated_at": "2023-01-14T08:55:24Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/lists/4"
+      			}
+      		}
+      	],
+      	"links": {
+      		"first": "http://easylist.sergeyem.ru/api/v1/lists?page[number]=1&page[size]=20",
+      		"last": "http://easylist.sergeyem.ru/api/v1/lists?page[number]=1&page[size]=20",
+      		"next": null,
+      		"prev": null
+      	},
+      	"meta": {
+      		"total": 3
+      	}
+      }
+
+      ```
     method: GET
     body: {}
-    parameters: []
+    parameters:
+      - id: pair_6f208f082fb24c7a9a68143689ea977e
+        name: page[number]
+        value: "1"
+        description: ""
+        disabled: true
+      - id: pair_8b972b1ff32344cf8f6c8364f8cb20c2
+        name: page[size]
+        value: "20"
+        description: ""
+        disabled: true
+      - id: pair_8b1d4b3f02da45948fbc441b2c0d88d6
+        name: include
+        value: folder,items
+        description: ""
+        disabled: true
+      - id: pair_b099950f7eb44d79bdeda905a7b27ef2
+        name: filter[name]
+        value: Soupe
+        description: ""
+        disabled: true
     headers:
       - id: pair_f36a4930c2e5442f97f3ba08587ad280
         name: Accept
@@ -313,8 +1120,10 @@ resources:
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
-    metaSortKey: -1672648590768
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1672648531292
     isPrivate: false
     settingStoreCookies: true
     settingSendCookies: true
@@ -323,27 +1132,181 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: req_e5fcde207ebe419dbe75dbcceaf415e4
-    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1672667526549
-    created: 1672664839365
-    url: "{{ _.URL }}folders/7"
-    name: Get Folder By Id
-    description: Retrieve folder by ID from DB
+  - _id: req_54a6563c54f34586bd899bc9ca33040f
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1674392120788
+    created: 1674374858825
+    url: "{{ _.URL }}lists"
+    name: Get All Lists
+    description: >-
+      Show all lists from specific folder
+
+
+      Supported includes:
+
+      * folder
+
+      * items
+
+
+      Supported sorting (by default is order):
+
+
+      * id
+
+      * name
+
+      * order
+
+      * created_at
+
+      * updated_at
+
+      * folder_id
+
+
+      Supported filters:
+
+      * name
+
+
+      Example response:
+
+
+      ```json
+
+      {
+      	"data": [
+      		{
+      			"type": "lists",
+      			"id": "3",
+      			"attributes": {
+      				"created_at": "2023-01-08T09:02:17Z",
+      				"folder_id": 5,
+      				"icon": "fa-list",
+      				"link": "c3074054-880a-4a12-8b5e-47c52a9581d0",
+      				"name": "Soupe Schi",
+      				"order": 1,
+      				"updated_at": "2023-01-14T09:40:44Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/lists/3"
+      			}
+      		},
+      		{
+      			"type": "lists",
+      			"id": "2",
+      			"attributes": {
+      				"created_at": "2023-01-08T08:28:38Z",
+      				"folder_id": 5,
+      				"icon": "fa-list",
+      				"link": "e4081b8c-b865-4573-9dcf-d1631c7fd092",
+      				"name": "Kompot Sec",
+      				"order": 3,
+      				"updated_at": "2023-01-08T10:15:49Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/lists/2"
+      			}
+      		},
+      		{
+      			"type": "lists",
+      			"id": "4",
+      			"attributes": {
+      				"created_at": "2023-01-14T08:55:24Z",
+      				"folder_id": 5,
+      				"icon": "fa-list",
+      				"link": null,
+      				"name": "Pure",
+      				"order": 4,
+      				"updated_at": "2023-01-14T08:55:24Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/lists/4"
+      			}
+      		}
+      	],
+      	"links": {
+      		"first": "http://easylist.sergeyem.ru/api/v1/lists?page[number]=1&page[size]=20",
+      		"last": "http://easylist.sergeyem.ru/api/v1/lists?page[number]=1&page[size]=20",
+      		"next": null,
+      		"prev": null
+      	},
+      	"meta": {
+      		"total": 3
+      	}
+      }
+
+      ```
     method: GET
     body: {}
-    parameters: []
+    parameters:
+      - id: pair_6f208f082fb24c7a9a68143689ea977e
+        name: page[number]
+        value: "1"
+        description: ""
+        disabled: true
+      - id: pair_8b972b1ff32344cf8f6c8364f8cb20c2
+        name: page[size]
+        value: "20"
+        description: ""
+        disabled: true
+      - id: pair_8b1d4b3f02da45948fbc441b2c0d88d6
+        name: include
+        value: items,folder
+        description: ""
+        disabled: true
+      - id: pair_b099950f7eb44d79bdeda905a7b27ef2
+        name: filter[name]
+        value: Soupe
+        description: ""
+        disabled: true
     headers:
-      - id: pair_e2b5e3a28ed04c35be133bb8ad90e3fb
+      - id: pair_f36a4930c2e5442f97f3ba08587ad280
         name: Accept
         value: application/vnd.api+json
         description: ""
-      - id: pair_96428eb1ce6041c185e1211cebd22f97
+      - id: pair_7eecaa59594f4fce845ec5c3342305aa
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
-    metaSortKey: -1672664839365
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1672648375560
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_583cddfdc8594fc2a8ef1289571fbd4a
+    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
+    modified: 1674392185913
+    created: 1673099149644
+    url: "{{ _.URL }}folders/6"
+    name: Delete Folder
+    description: Permanently delete folder by it's ID. Note, that we can not
+      rollback this operation. After deletion, it will remove also all lists and
+      items.
+    method: DELETE
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_4f493bcd10354be5b49f934254bd64dc
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_78a0124cc5334506964afe1fde66c685
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673099149644
     isPrivate: false
     settingStoreCookies: true
     settingSendCookies: true
@@ -362,13 +1325,186 @@ resources:
     environmentPropertyOrder: null
     metaSortKey: -1672647911898
     _type: request_group
+  - _id: req_b9f5a7d5d10f41a2b198ed34c3501702
+    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
+    modified: 1674392188524
+    created: 1673096527868
+    url: "{{ _.URL }}folders/10"
+    name: Update Folder
+    description: >-
+      Update folder by ID. Need to pass an ID in route, the same as in request
+      body.
+
+
+      Example request:
+
+      ```json
+
+      {
+        "data": {
+      		"id": "4",
+          "type": "folders",
+          "attributes": {
+            "name": "Secondary folder new",
+            "icon": "fa-folder",
+      			"order": 2
+          }
+        }
+      }
+
+      ```
+
+
+      Example response:
+
+      ``` json
+
+      {
+      	"data": {
+      		"id": "4",
+      		"type": "folders",
+      		"attributes": {
+      			"name": "Secondary folder new",
+      			"icon": "fa-folder",
+      			"version": 2,
+      			"order": 2
+      		}
+      	}
+      }
+
+      ```
+    method: PATCH
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+        		"id": "10",
+            "type": "folders",
+            "attributes": {
+        			"name": "Super smartphones",
+              "icon": "fa-folder"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/vnd.api+json
+        id: pair_a82aaff18f364b05b9e658a51eea9a1f
+      - id: pair_c9def7ea2a584f17a110fc34a368c5cf
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673096527868
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_e5fcde207ebe419dbe75dbcceaf415e4
+    parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
+    modified: 1674392183884
+    created: 1672664839365
+    url: "{{ _.URL }}folders/5"
+    name: Get Folder By Id
+    description: |-
+      Retrieve folder by ID from DB.
+      Route protected by auth middleware.
+
+      Available includes:
+      * lists
+
+      Example response:
+      ```json
+      {
+      	"data": {
+      		"id": "6",
+      		"type": "folders",
+      		"attributes": {
+      			"name": "Some staff",
+      			"icon": "fa-folder",
+      			"version": 1,
+      			"order": 4
+      		}
+      	}
+      }
+      ```
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_467ff136bc1a492b83a019c660998d72
+        name: include
+        value: lists
+        description: ""
+        disabled: false
+    headers:
+      - id: pair_e2b5e3a28ed04c35be133bb8ad90e3fb
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_96428eb1ce6041c185e1211cebd22f97
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+      disabled: false
+    metaSortKey: -1672664839365
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
   - _id: req_f15cc6d39d5945a7aa39d3010e36600b
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1672755593840
+    modified: 1674392182768
     created: 1672648160352
     url: "{{ _.URL }}folders"
     name: Create New Folder
-    description: Create a new folder
+    description: |-
+      Create a new folder.
+
+      Example request:
+
+      ```json
+      {
+        "data": {
+          "type": "folders",
+          "attributes": {
+            "name": "Some staff",
+            "icon": "fa-folder"
+          }
+        }
+      }
+      ```
+
+      Example response:
+
+      ```json
+      {
+      	"data": {
+      		"id": "6",
+      		"type": "folders",
+      		"attributes": {
+      			"name": "Some staff",
+      			"icon": "fa-folder",
+      			"version": 1,
+      			"order": 4
+      		}
+      	}
+      }
+      ```
     method: POST
     body:
       mimeType: application/json
@@ -377,9 +1513,8 @@ resources:
           "data": {
             "type": "folders",
             "attributes": {
-              "name": "Ember Hamster",
-              "icon": "fa-folder",
-        			"order": 1
+              "name": "Smartphones",
+              "icon": "fa-folder"
             }
           }
         }
@@ -393,7 +1528,9 @@ resources:
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
     metaSortKey: -1672648160352
     isPrivate: false
     settingStoreCookies: true
@@ -405,14 +1542,161 @@ resources:
     _type: request
   - _id: req_fd86a0c9e0aa49ddad807e9d788a2af4
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1672662239770
+    modified: 1674392178042
     created: 1672647917161
     url: "{{ _.URL }}folders"
     name: Get All Folders
-    description: Show details of all folders
+    description: >-
+      Show details of all folders
+
+
+      Supported sorting fields:
+
+      * name
+
+      * created_at
+
+      * updated_at
+
+      * order
+
+      * id
+
+
+      Default sorting field is order
+
+
+      Example response:
+
+      ```json
+
+      {
+      	"data": [
+      		{
+      			"type": "folders",
+      			"id": "1",
+      			"attributes": {
+      				"created_at": "2023-01-07T10:16:32Z",
+      				"icon": "fa-folder",
+      				"name": "default",
+      				"order": 1,
+      				"updated_at": "2023-01-07T10:16:32Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/folders/1"
+      			}
+      		},
+      		{
+      			"type": "folders",
+      			"id": "4",
+      			"attributes": {
+      				"created_at": "2023-01-07T10:23:23Z",
+      				"icon": "fa-folder",
+      				"name": "Secondary folder",
+      				"order": 3,
+      				"updated_at": "2023-01-07T20:19:11Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/folders/4"
+      			}
+      		},
+      		{
+      			"type": "folders",
+      			"id": "5",
+      			"attributes": {
+      				"created_at": "2023-01-07T10:24:37Z",
+      				"icon": "fa-folder",
+      				"name": "Some New staff",
+      				"order": 9,
+      				"updated_at": "2023-01-07T14:32:43Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/folders/5"
+      			}
+      		},
+      		{
+      			"type": "folders",
+      			"id": "9",
+      			"attributes": {
+      				"created_at": "2023-01-12T07:57:25Z",
+      				"icon": "fa-folder",
+      				"name": "Additional products for day",
+      				"order": 11,
+      				"updated_at": "2023-01-12T08:09:22Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/folders/9"
+      			}
+      		},
+      		{
+      			"type": "folders",
+      			"id": "8",
+      			"attributes": {
+      				"created_at": "2023-01-07T20:18:42Z",
+      				"icon": "fa-folder",
+      				"name": "some things",
+      				"order": 12,
+      				"updated_at": "2023-01-07T20:18:42Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/folders/8"
+      			}
+      		},
+      		{
+      			"type": "folders",
+      			"id": "10",
+      			"attributes": {
+      				"created_at": "2023-01-16T17:28:58Z",
+      				"icon": "fa-folder",
+      				"name": "Super smartphones",
+      				"order": 13,
+      				"updated_at": "2023-01-16T17:45:04Z"
+      			},
+      			"links": {
+      				"self": "http://easylist.sergeyem.ru/api/v1/folders/10"
+      			}
+      		}
+      	],
+      	"links": {
+      		"first": "http://easylist.sergeyem.ru/api/v1/folders?page[number]=1&page[size]=20",
+      		"last": "http://easylist.sergeyem.ru/api/v1/folders?page[number]=1&page[size]=20",
+      		"next": null,
+      		"prev": null
+      	},
+      	"meta": {
+      		"total": 6
+      	}
+      }
+
+      ```
     method: GET
     body: {}
-    parameters: []
+    parameters:
+      - id: pair_670e204e5bc74ee8b81216600cbe7f69
+        name: filter[name]
+        value: some
+        description: ""
+        disabled: true
+      - id: pair_9d86ba033b8a4215a028e6c372e91129
+        name: sort
+        value: name
+        description: ""
+        disabled: true
+      - id: pair_46494f659a474f6f9b1d3c68d03b7b67
+        name: page[number]
+        value: "2"
+        description: ""
+        disabled: true
+      - id: pair_6729ddb734a74423be009c986d95fdf3
+        name: page[size]
+        value: "2"
+        description: ""
+        disabled: true
+      - id: pair_489c1c84142741d8804e7edbbe99bc72
+        name: include
+        value: lists
+        description: ""
+        disabled: true
     headers:
       - id: pair_cb351051756f4e778e2baebd067b3d8b
         name: Accept
@@ -422,7 +1706,9 @@ resources:
         name: Content-Type
         value: application/vnd.api+json
         description: ""
-    authentication: {}
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
     metaSortKey: -1672647917161
     isPrivate: false
     settingStoreCookies: true
@@ -477,14 +1763,16 @@ resources:
     _type: request_group
   - _id: env_92ba6d65fed7fc77b239199e8dafacab6ca5ea23
     parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672645106448
+    modified: 1673015602679
     created: 1672645019687
     name: Base Environment
     data:
       URL: http://localhost:4000/api/v1/
+      TOKEN: 6PGFAHUMTTYIAVWIXEL2JUUORM
     dataPropertyOrder:
       "&":
         - URL
+        - TOKEN
     color: null
     isPrivate: false
     metaSortKey: 1672645019687
