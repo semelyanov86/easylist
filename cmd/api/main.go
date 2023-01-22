@@ -8,6 +8,7 @@ import (
 	"easylist/internal/mailer"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -93,6 +94,7 @@ func main() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
