@@ -24,6 +24,7 @@ type List struct {
 	UpdatedAt time.Time `jsonapi:"attr,updated_at,iso8601" json:"updated_at" time_format:"sql_datetime"`
 	IsPublic  bool      `jsonapi:"attr,is_public,omitempty"`
 	Folder    *Folder   `jsonapi:"relation,folder,omitempty"`
+	Items     Items     `jsonapi:"relation,items,omitempty"`
 }
 
 type Lists []*List
@@ -90,11 +91,24 @@ func (l ListModel) Insert(list *List) error {
 func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error) {
 	var joinFolder string
 	var fieldsFolder string
+	var groupItems string
+	var joinItems string
+	var fieldsItems string
 	if Contains(filters.Includes, "folder") {
 		joinFolder = "INNER JOIN folders ON lists.folder_id = folders.id"
 		fieldsFolder = ", folders.id, folders.user_id, folders.name, folders.icon, folders.version, folders.order, folders.created_at, folders.updated_at"
 	}
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at%s FROM lists %s WHERE lists.user_id = ? AND (lists.folder_id = ? OR ? = 0) AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, joinFolder, filters.sortColumn(), filters.sortDirection())
+	if Contains(filters.Includes, "items") {
+		var q = "SET SESSION group_concat_max_len = 1000000"
+		_, err := l.DB.Exec(q)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+		joinItems = "LEFT JOIN items ON items.list_id = lists.id"
+		fieldsItems = ", (SELECT CONCAT('[',GROUP_CONCAT(JSON_OBJECT('id', items.id, 'user_id', items.user_id, 'ListId', items.list_id, 'name', items.name, 'description', items.description, 'quantity', items.quantity, 'QuantityType', items.quantity_type, 'price', items.price, 'IsStarred', if(items.is_starred = 1, cast(TRUE as json), cast(FALSE as json)), 'file', items.file, 'version', items.version, 'order', items.order, 'created_at', items.created_at, 'updated_at', items.updated_at)),']')) as parsed_items"
+		groupItems = "GROUP BY lists.id"
+	}
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at%s%s FROM lists %s %s WHERE lists.user_id = ? AND (lists.folder_id = ? OR ? = 0) AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') %s ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, fieldsItems, joinFolder, joinItems, groupItems, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -112,12 +126,51 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 	for rows.Next() {
 		var list List
 		var folder Folder
-		if Contains(filters.Includes, "folder") {
-			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
-			list.Folder = &folder
-		} else {
+		var items []Item
+		var parsedItems sql.NullString
+		if len(filters.Includes) == 0 {
 			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
 		}
+		if Contains(filters.Includes, "folder") && Contains(filters.Includes, "items") {
+			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt, &parsedItems)
+
+			list.Folder = &folder
+			if err != nil {
+				return nil, emptyMeta, err
+			}
+			items, err = parseItems(parsedItems)
+			if err != nil {
+				return nil, emptyMeta, err
+			}
+			for _, curItem := range items {
+				if curItem.ID > 0 {
+					var importItem = curItem
+					list.Items = append(list.Items, &importItem)
+				}
+			}
+		} else {
+			if Contains(filters.Includes, "folder") {
+				err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+				list.Folder = &folder
+			}
+			if Contains(filters.Includes, "items") {
+				err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &parsedItems)
+				if err != nil {
+					return nil, emptyMeta, err
+				}
+				items, err = parseItems(parsedItems)
+				if err != nil {
+					return nil, emptyMeta, err
+				}
+				for _, curItem := range items {
+					if curItem.ID > 0 {
+						var importItem = curItem
+						list.Items = append(list.Items, &importItem)
+					}
+				}
+			}
+		}
+
 		if err != nil {
 			return nil, emptyMeta, err
 		}
@@ -132,6 +185,17 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size, folderId, "folders")
 
 	return lists, metadata, nil
+}
+
+func parseItems(parsedItems sql.NullString) ([]Item, error) {
+	var tempItems []Item
+
+	if parsedItems.Valid {
+		if err := json.Unmarshal([]byte(parsedItems.String), &tempItems); err != nil {
+			return tempItems, err
+		}
+	}
+	return tempItems, nil
 }
 
 func (l ListModel) Get(id int64, userId int64) (*List, error) {
@@ -257,6 +321,15 @@ func (lists Lists) JSONAPIMeta() *jsonapi.Meta {
 	return &jsonapi.Meta{
 		"total": 0,
 	}
+}
+
+func (list List) JSONAPIRelationshipLinks(relation string) *jsonapi.Links {
+	if relation == "items" {
+		return &jsonapi.Links{
+			"related": fmt.Sprintf("%s/lists/%d/items", DomainName, list.ID),
+		}
+	}
+	return nil
 }
 
 type MockListModel struct {
