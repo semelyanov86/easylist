@@ -326,6 +326,15 @@ func (folders Folders) JSONAPIMeta() *jsonapi.Meta {
 	}
 }
 
+func (folder Folder) JSONAPIRelationshipLinks(relation string) *jsonapi.Links {
+	if relation == "lists" {
+		return &jsonapi.Links{
+			"related": fmt.Sprintf("%s/folders/%d/lists", DomainName, folder.ID),
+		}
+	}
+	return nil
+}
+
 type MockFolderModel struct {
 }
 
