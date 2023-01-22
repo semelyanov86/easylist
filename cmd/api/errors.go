@@ -200,3 +200,18 @@ func (app *application) notPermittedResponse(w http.ResponseWriter, r *http.Requ
 	}
 	app.errorResponse(w, r, http.StatusForbidden, jsonapi.ErrorsPayload{Errors: []*jsonapi.ErrorObject{&errorObject}})
 }
+
+func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
+	message := "rate limit exceeded"
+	m := make(map[string]interface{})
+	m["pointer"] = "rateLimit middleware"
+
+	var errorObject = jsonapi.ErrorObject{
+		Status: "429",
+		Code:   "429",
+		Meta:   &m,
+		Title:  "Rate Limit error",
+		Detail: message,
+	}
+	app.errorResponse(w, r, http.StatusTooManyRequests, jsonapi.ErrorsPayload{Errors: []*jsonapi.ErrorObject{&errorObject}})
+}

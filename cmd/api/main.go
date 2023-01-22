@@ -38,6 +38,11 @@ type config struct {
 		password string
 		sender   string
 	}
+	limiter struct {
+		rps     float64
+		burst   int
+		enabled bool
+	}
 }
 
 type application struct {
@@ -70,6 +75,11 @@ func main() {
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "EasyList Admin <admin@sergeyem.ru>", "SMTP Sender")
 
 	flag.StringVar(&cfg.domain, "domain", "http://easylist.sergeyem.ru", "Domain name of server")
+
+	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
+	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
+	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+
 	flag.Parse()
 
 	data.DomainName = cfg.domain
