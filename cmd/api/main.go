@@ -8,8 +8,6 @@ import (
 	"easylist/internal/mailer"
 	"flag"
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -101,18 +99,11 @@ func main() {
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		ErrorLog:     log.New(logger, "", 0),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+	err = app.serve()
+	if err != nil {
+		logger.PrintFatal(err, nil)
 	}
-
-	logger.PrintInfo(fmt.Sprintf("starting %s server on %s", cfg.env, srv.Addr), nil)
-	err = srv.ListenAndServe()
-	logger.PrintFatal(err, nil)
+	logger.PrintInfo(fmt.Sprintf("starting %s server on %s", cfg.env, cfg.port), nil)
 }
 
 func openDB(cfg config) (*sql.DB, error) {
