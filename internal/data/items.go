@@ -203,13 +203,13 @@ func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred boo
 	if isStarred {
 		starredFilter = "AND items.is_starred = 1"
 	}
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, created_at, updated_at FROM items WHERE items.user_id = ? AND items.list_id = ? %s AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", starredFilter, filters.sortColumn(), filters.sortDirection())
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, created_at, updated_at FROM items WHERE items.user_id = ? AND (items.list_id = ? OR ? = 0) %s AND (MATCH(name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY `%s` %s, `order` ASC LIMIT ? OFFSET ?", starredFilter, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var emptyMeta Metadata
 
-	rows, err := i.DB.QueryContext(ctx, query, userId, listId, name, name, filters.limit(), filters.offset())
+	rows, err := i.DB.QueryContext(ctx, query, userId, listId, listId, name, name, filters.limit(), filters.offset())
 	if err != nil {
 		return nil, emptyMeta, err
 	}

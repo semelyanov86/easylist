@@ -70,7 +70,7 @@ func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Reques
 func (app *application) indexItemsHandler(w http.ResponseWriter, r *http.Request) {
 	listId, err := app.readIDParam(r)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 	v := validator.New()

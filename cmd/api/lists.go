@@ -78,7 +78,8 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 func (app *application) indexListsHandler(w http.ResponseWriter, r *http.Request) {
 	folderId, err := app.readIDParam(r)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
+		return
 	}
 
 	var v = validator.New()
@@ -86,22 +87,24 @@ func (app *application) indexListsHandler(w http.ResponseWriter, r *http.Request
 	var input ListInput
 	var userModel = app.contextGetUser(r)
 
-	_, err = app.models.Folders.Get(folderId, userModel.ID)
-	if err != nil {
-		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
-			app.notPermittedResponse(w, r)
-		default:
-			app.serverErrorResponse(w, r, err)
+	if folderId > 0 {
+		_, err = app.models.Folders.Get(folderId, userModel.ID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.notPermittedResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
 		}
-		return
 	}
 
 	input.Name = app.readString(qs, "filter[name]", "")
 	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
 	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "order")
-	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "-id", "-name", "-order", "-created_at", "-updated_at"}
+	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "folder_id", "-id", "-name", "-order", "-created_at", "-updated_at", "-folder_id"}
 	input.Filters.Includes = app.readCSV(qs, "include", []string{})
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
