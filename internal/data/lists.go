@@ -94,13 +94,13 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 		joinFolder = "INNER JOIN folders ON lists.folder_id = folders.id"
 		fieldsFolder = ", folders.id, folders.user_id, folders.name, folders.icon, folders.version, folders.order, folders.created_at, folders.updated_at"
 	}
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at%s FROM lists %s WHERE lists.user_id = ? AND lists.folder_id = ? AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, joinFolder, filters.sortColumn(), filters.sortDirection())
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at%s FROM lists %s WHERE lists.user_id = ? AND (lists.folder_id = ? OR ? = 0) AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, joinFolder, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var emptyMeta Metadata
 
-	rows, err := l.DB.QueryContext(ctx, query, userId, folderId, name, name, filters.limit(), filters.offset())
+	rows, err := l.DB.QueryContext(ctx, query, userId, folderId, folderId, name, name, filters.limit(), filters.offset())
 	if err != nil {
 		return nil, emptyMeta, err
 	}
@@ -129,7 +129,7 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 		return nil, emptyMeta, err
 	}
 
-	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size)
+	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size, folderId, "folders")
 
 	return lists, metadata, nil
 }

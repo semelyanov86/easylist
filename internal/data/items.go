@@ -231,7 +231,7 @@ func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred boo
 		return nil, emptyMeta, err
 	}
 
-	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size)
+	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size, listId, "lists")
 
 	return items, metadata, nil
 }

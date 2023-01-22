@@ -22,9 +22,11 @@ type Metadata struct {
 	TotalRecords int
 	NextPage     int
 	PrevPage     int
+	ParentId     int64
+	ParentName   string
 }
 
-func calculateMetadata(totalRecords, page, pageSize int) Metadata {
+func calculateMetadata(totalRecords, page, pageSize int, parent int64, parentName string) Metadata {
 	if totalRecords == 0 {
 		return Metadata{}
 	}
@@ -41,6 +43,8 @@ func calculateMetadata(totalRecords, page, pageSize int) Metadata {
 		TotalRecords: totalRecords,
 		NextPage:     nextPage,
 		PrevPage:     page - 1,
+		ParentId:     parent,
+		ParentName:   parentName,
 	}
 }
 

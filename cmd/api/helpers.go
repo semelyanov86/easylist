@@ -77,12 +77,16 @@ func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, da
 		return err
 	}
 
+	var relationPrefix string
 	if manyPayload, ok := res.(*jsonapi.ManyPayload); ok {
+		if metadata.ParentId != 0 {
+			relationPrefix = metadata.ParentName + "/" + strconv.Itoa(int(metadata.ParentId)) + "/"
+		}
 		manyPayload.Links = &jsonapi.Links{
-			jsonapi.KeyFirstPage:    app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.FirstPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
-			jsonapi.KeyPreviousPage: app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.PrevPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
-			jsonapi.KeyNextPage:     app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.NextPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
-			jsonapi.KeyLastPage:     app.config.domain + "/api/v1/" + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.LastPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyFirstPage:    app.config.domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.FirstPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyPreviousPage: app.config.domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.PrevPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyNextPage:     app.config.domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.NextPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyLastPage:     app.config.domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.LastPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
 		}
 		if metadata.NextPage == 0 {
 			(*manyPayload.Links)[jsonapi.KeyNextPage] = nil

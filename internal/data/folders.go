@@ -297,7 +297,7 @@ func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders
 		return nil, emptyMeta, err
 	}
 
-	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size)
+	var metadata = calculateMetadata(totalRecords, filters.Page, filters.Size, 0, "")
 
 	return folders, metadata, nil
 }
