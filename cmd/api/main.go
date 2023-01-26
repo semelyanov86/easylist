@@ -18,7 +18,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const version = "1.0.0"
+var version string
+var buildTime string
 
 type config struct {
 	port         int
@@ -89,7 +90,15 @@ func main() {
 		return nil
 	})
 
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		fmt.Printf("Build time:\t%s\n", buildTime)
+		os.Exit(0)
+	}
 
 	data.DomainName = cfg.domain
 	db, err := openDB(cfg)
