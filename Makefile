@@ -21,7 +21,7 @@ confirm:
 ## run: run the cmd/api application
 .PHONY: run
 run:
-	go run ./cmd/api -db-dsn=${EASYLIST_DB_DSN}
+	go run ./cmd/api -dsn=${EASYLIST_DB_DSN}
 
 ## db: connect to the database using mysql
 .PHONY: db
@@ -51,7 +51,7 @@ audit: vendor
 	go fmt ./...
 	@echo 'Vetting code...'
 	go vet ./...
-	staticcheck ./...
+	/home/sergey/go/bin/staticcheck ./...
 	@echo 'Running tests...'
 	go test -race -vet=off ./...
 
@@ -88,16 +88,16 @@ production_host_ip = "your.ip.address"
 ## production/connect: connect to the production server
 .PHONY: production/connect
 production/connect:
-	ssh greenlight@${production_host_ip}
+	ssh root@${production_host_ip}
 
 ## production/deploy/api: deploy the api to production
 .PHONY: production/deploy/api
 production/deploy/api:
-	rsync -P ./bin/linux_amd64/api greenlight@${production_host_ip}:~
-	rsync -rP --delete ./migrations greenlight@${production_host_ip}:~
-	rsync -P ./remote/production/api.service greenlight@${production_host_ip}:~
-	rsync -P ./remote/production/Caddyfile greenlight@${production_host_ip}:~
-	ssh -t greenlight@${production_host_ip} '\
+	rsync -P ./bin/linux_amd64/api root@${production_host_ip}:~
+	rsync -rP --delete ./migrations root@${production_host_ip}:~
+	rsync -P ./remote/production/api.service root@${production_host_ip}:~
+	rsync -P ./remote/production/Caddyfile root@${production_host_ip}:~
+	ssh -t root@${production_host_ip} '\
 		migrate -path ~/migrations -database $$EASYLIST_DB_DSN up \
 		&& sudo mv ~/api.service /etc/systemd/system/ \
 		&& sudo systemctl enable api \

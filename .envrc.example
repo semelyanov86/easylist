@@ -1,0 +1,1 @@
+export EASYLIST_DB_DSN=root:passpass@/easylist?parseTime=true
