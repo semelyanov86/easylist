@@ -6,9 +6,11 @@ import (
 	"easylist/internal/data"
 	"easylist/internal/jsonlog"
 	"easylist/internal/mailer"
+	"expvar"
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -100,6 +102,17 @@ func main() {
 			logger.PrintError(err, nil)
 		}
 	}(db)
+
+	expvar.NewString("version").Set(version)
+	expvar.Publish("goroutines", expvar.Func(func() any {
+		return runtime.NumGoroutine()
+	}))
+	expvar.Publish("database", expvar.Func(func() any {
+		return db.Stats()
+	}))
+	expvar.Publish("timestamp", expvar.Func(func() any {
+		return time.Now().Unix()
+	}))
 
 	app := &application{
 		config: cfg,

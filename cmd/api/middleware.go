@@ -4,10 +4,13 @@ import (
 	"easylist/internal/data"
 	"easylist/internal/validator"
 	"errors"
+	"expvar"
 	"fmt"
+	"github.com/felixge/httpsnoop"
 	"golang.org/x/time/rate"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -183,5 +186,30 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(writer, request)
+	})
+}
+
+func (app *application) metrics(next http.Handler) http.Handler {
+	totalRequestReceived := expvar.NewInt("total_request_received")
+	totalResponsesSent := expvar.NewInt("total_responses_sent")
+	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_ms")
+	activeConnections := expvar.NewInt("number_active_connections")
+	totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		totalRequestReceived.Add(1)
+		metrics := httpsnoop.CaptureMetrics(next, writer, request)
+		next.ServeHTTP(writer, request)
+		totalResponsesSent.Add(1)
+
+		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
+		totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
+		totalResponses, err := strconv.Atoi(expvar.Get("total_responses_sent").String())
+		totalRequests, err := strconv.Atoi(expvar.Get("total_request_received").String())
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+		activeConnections.Set(int64(totalRequests - totalResponses))
+
 	})
 }

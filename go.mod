@@ -11,6 +11,7 @@ require github.com/jameskeane/bcrypt v0.0.0-20120420032655-c3cd44c1e20f
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-mail/mail/v2 v2.3.0 // indirect
 	github.com/gomarkdown/markdown v0.0.0-20210208175418-bda154fe17d8 // indirect
 	github.com/google/jsonapi v1.0.0 // indirect
