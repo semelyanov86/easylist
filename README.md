@@ -1,6 +1,13 @@
 # EasyList
+![Logo](https://sergeyem.ru/img/sprite.png)
 
 Easy and best way to manage shopping and meal planning
+
+
+## Tech Stack
+**Client:** Vue.js 3, TailwindCSS
+
+**Server:** Golang
 
 
 ## Installation
@@ -10,6 +17,8 @@ Clone project and generate binary, running make command
 ```bash
   make run
 ```
+
+OR just download `api` executable from realeases folder
 
 To fill database, first install migrate tool:
 ```bash
@@ -27,3 +36,52 @@ To run migration, execute following command:
 ```bash
 make migrate
 ```
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .envrc file
+
+`EASYLIST_DB_DSN=root:password@/easylist?parseTime=true`
+
+
+## Running Tests
+
+To run tests, run the following command
+
+```bash
+  make audit
+```
+
+
+## Deployment
+
+To deploy this project run
+
+```bash
+  production/deploy/api
+```
+
+## API Reference
+You can find Insomnia yaml collection in folder `documentation/api`
+
+## Features
+
+- User registration and authorization via Bearer token
+- List of folders and Lists
+- Item storage with attachment. Each item links with 'List'
+- Metrics and health check endpoints.
+
+
+
+## Acknowledgements
+
+- [Json:Api standard](https://jsonapi.org)
+
+## Support
+
+For support, email se@sergeyem.ru or via telegram @sergeyem.
+
+
+## Authors
+
+- [@sergeyem](https://www.sergeyem.ru)

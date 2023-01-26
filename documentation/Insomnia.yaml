@@ -1,6 +1,6 @@
 _type: export
 __export_format: 4
-__export_date: 2023-01-22T12:56:48.047Z
+__export_date: 2023-01-26T11:17:15.417Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
   - _id: req_6b0bdf5ec9f34ea99849f7f2e2b8a247
@@ -570,7 +570,7 @@ resources:
     _type: request
   - _id: req_708c51a16e4b4e4281c5fc05af364416
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1674391885562
+    modified: 1674731756884
     created: 1674375350438
     url: "{{ _.URL }}items"
     name: Get All Items
@@ -1134,7 +1134,7 @@ resources:
     _type: request
   - _id: req_54a6563c54f34586bd899bc9ca33040f
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1674392120788
+    modified: 1674715525433
     created: 1674374858825
     url: "{{ _.URL }}lists"
     name: Get All Lists
@@ -1327,7 +1327,7 @@ resources:
     _type: request_group
   - _id: req_b9f5a7d5d10f41a2b198ed34c3501702
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674392188524
+    modified: 1674411276165
     created: 1673096527868
     url: "{{ _.URL }}folders/10"
     name: Update Folder
@@ -1410,7 +1410,7 @@ resources:
     _type: request
   - _id: req_e5fcde207ebe419dbe75dbcceaf415e4
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674392183884
+    modified: 1674411787936
     created: 1672664839365
     url: "{{ _.URL }}folders/5"
     name: Get Folder By Id
@@ -1468,7 +1468,7 @@ resources:
     _type: request
   - _id: req_f15cc6d39d5945a7aa39d3010e36600b
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674392182768
+    modified: 1674411282644
     created: 1672648160352
     url: "{{ _.URL }}folders"
     name: Create New Folder
@@ -1542,7 +1542,7 @@ resources:
     _type: request
   - _id: req_fd86a0c9e0aa49ddad807e9d788a2af4
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674392178042
+    modified: 1674411283118
     created: 1672647917161
     url: "{{ _.URL }}folders"
     name: Get All Folders
@@ -1718,9 +1718,48 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
+  - _id: req_509e7dbcaea9486e9e574f4ce59be00b
+    parentId: fld_8702d6560c614c28a361dd04f5e56bfb
+    modified: 1674715602330
+    created: 1674715532429
+    url: "{{ _.URL }}debug/vars"
+    name: Metrics
+    description: Data, containing information about running application
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_4b60c5b8772f42778c9fe2315c83a7af
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_06203a619c3e4f0e8ea938b1b80f8a1b
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1674715532429
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_8702d6560c614c28a361dd04f5e56bfb
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672645030605
+    created: 1672645030605
+    name: Support
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672645030605
+    _type: request_group
   - _id: req_00c2bf62cd5c4c7eaa3dbef39615ed90
     parentId: fld_8702d6560c614c28a361dd04f5e56bfb
-    modified: 1672663668915
+    modified: 1674715541504
     created: 1672645033158
     url: "{{ _.URL }}healthcheck"
     name: Health Check
@@ -1751,16 +1790,6 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_8702d6560c614c28a361dd04f5e56bfb
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672645030605
-    created: 1672645030605
-    name: Support
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672645030605
-    _type: request_group
   - _id: env_92ba6d65fed7fc77b239199e8dafacab6ca5ea23
     parentId: wrk_074fff2091894028b24cd3a631beb9fa
     modified: 1673015602679
