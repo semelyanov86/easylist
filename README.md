@@ -43,6 +43,28 @@ To run this project, you will need to add the following environment variables to
 
 `EASYLIST_DB_DSN=root:password@/easylist?parseTime=true`
 
+## Command line arguments
+
+You can run executable script with following arguments:
+
+* `dsn` - MySQL data source name. Pass this param if you want to rewrite ENV variable.
+* `db-max-open-conns` - MySql max open connections. Default is 25.
+* `db-max-idle-conns` - Mysql maximum idle connections. Default is 25.
+* `db-max-idle-time` - MySql max connection idle time. Default 15m.
+* `env` - Environment (development,staging or production)
+* `registration` - Is registration enabled? Default true.
+* `confirmation` - Is email confirmation enabled? Default true.
+* `smtp-host` - SMTP Host
+* `smtp-port` - SMTP port
+* `smtp-username` - SMTP Username
+* `smtp-password` - SMTP Password
+* `smtp-sender` - SMTP Sender
+* `domain` - What is domain name of server? Default is http://easylist.sergeyem.ru
+* `limiter-rps` - Rate limiter maximum requests per second. Default is 2
+* `limiter-burst` - Rate limiter maximum burst. Default is 4.
+* `limiter-enabled` - Enable rate limiter or not? Default is true.
+* `cors-trusted-origins` - Trusted cors origins (space separated)
+* `version` - Display script version and exit.
 
 ## Running Tests
 
