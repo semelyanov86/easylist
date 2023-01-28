@@ -199,7 +199,7 @@ func (app *application) metrics(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		totalRequestReceived.Add(1)
 		metrics := httpsnoop.CaptureMetrics(next, writer, request)
-		next.ServeHTTP(writer, request)
+
 		totalResponsesSent.Add(1)
 
 		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
