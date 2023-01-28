@@ -79,7 +79,7 @@ func NewMockModels() Models {
 
 func ConvertSliceToQuestionMarks(ids []any) string {
 	var result string
-	for _, _ = range ids {
+	for range ids {
 		result = result + "?,"
 	}
 	return strings.Trim(result, ",")

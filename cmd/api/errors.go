@@ -7,21 +7,6 @@ import (
 	"net/http"
 )
 
-type errorEnvelope struct {
-	Errors []errorData `json:"errors"`
-}
-
-type errorData struct {
-	Status string            `json:"status"`
-	Source map[string]string `json:"source"`
-	Title  string            `json:"title"`
-	Detail string            `json:"detail"`
-}
-
-func (e *errorData) Error() string {
-	return fmt.Sprintf("Error: %s %s\n", e.Title, e.Detail)
-}
-
 func (app *application) logError(r *http.Request, err error) {
 	app.logger.PrintError(err, nil)
 }

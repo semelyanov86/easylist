@@ -14,8 +14,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	_ "golang.org/x/time/rate"
 )
 
 func (app *application) authenticate(next http.Handler) http.Handler {
@@ -205,6 +203,9 @@ func (app *application) metrics(next http.Handler) http.Handler {
 		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
 		totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
 		totalResponses, err := strconv.Atoi(expvar.Get("total_responses_sent").String())
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
 		totalRequests, err := strconv.Atoi(expvar.Get("total_request_received").String())
 		if err != nil {
 			app.logger.PrintError(err, nil)

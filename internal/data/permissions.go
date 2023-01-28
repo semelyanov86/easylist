@@ -56,7 +56,7 @@ func (p PermissionModel) GetAllForUser(userId int64) (Permissions, error) {
 
 func (p PermissionModel) AddForUser(userId int64, codes ...string) error {
 	var permissionMarks []string
-	for _, _ = range codes {
+	for range codes {
 		permissionMarks = append(permissionMarks, "?")
 	}
 

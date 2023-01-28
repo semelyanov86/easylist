@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *http.Request) {
+/*func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email string `json:"email"`
 	}
@@ -73,7 +73,7 @@ func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *h
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-}
+}*/
 
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	type attributes struct {

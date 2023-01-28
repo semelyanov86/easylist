@@ -9,7 +9,6 @@ import (
 	"errors"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jameskeane/bcrypt"
-	_ "github.com/jameskeane/bcrypt"
 	"strings"
 	"time"
 )

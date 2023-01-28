@@ -55,6 +55,7 @@ There is 2 configuration example files.
 `config.yaml` - for storing app configuration
 
 To create them, use .envrc.example and config.yaml.example files.
+Put your config `easylist.yaml` file in `~/.config` directory
 
 ## Running Tests
 

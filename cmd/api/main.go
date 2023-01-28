@@ -21,7 +21,11 @@ func main() {
 	var cfg config
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
-	bytesOut, err := os.ReadFile("config.yaml")
+	dirname, err := os.UserConfigDir()
+	if err != nil {
+		panic(err)
+	}
+	bytesOut, err := os.ReadFile(dirname + "/easylist.yaml")
 
 	if err != nil {
 		panic(err)
@@ -74,7 +78,7 @@ func main() {
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
-	logger.PrintInfo(fmt.Sprintf("starting %s server on %s", cfg.Env, cfg.Port), nil)
+	logger.PrintInfo(fmt.Sprintf("starting %s server on %d", cfg.Env, cfg.Port), nil)
 }
 
 func openDB(cfg config) (*sql.DB, error) {

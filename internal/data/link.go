@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-var ErrInvalidLinkFormat = errors.New("Invalid link format")
+var ErrInvalidLinkFormat = errors.New("invalid link format")
 
 type Link struct {
 	sql.NullString
