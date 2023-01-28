@@ -66,7 +66,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var headers = make(http.Header)
-	headers.Set("Location", fmt.Sprintf("%s/api/v1/lists/%d", app.config.domain, list.ID))
+	headers.Set("Location", fmt.Sprintf("%s/api/v1/lists/%d", app.config.Domain, list.ID))
 
 	err = app.writeJSON(w, http.StatusCreated, list, headers)
 

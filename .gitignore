@@ -2,3 +2,4 @@
 bin/
 vendor/
 storage/
+config.yaml

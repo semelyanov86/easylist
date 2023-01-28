@@ -53,7 +53,7 @@ func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *h
 	app.background(func() {
 		data := map[string]interface{}{
 			"activationToken": token.Plaintext,
-			"domain":          app.config.domain,
+			"Domain":          app.config.Domain,
 		}
 
 		err = app.mailer.Send(user.Email, "token_activation.tmpl", data)
@@ -78,7 +78,7 @@ func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *h
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	type attributes struct {
 		Email    string `json:"email"`
-		Password string `json:"password"`
+		Password string `json:"Password"`
 	}
 	type inputAttributes struct {
 		Type       string     `json:"type"`

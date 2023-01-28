@@ -9,7 +9,7 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Reques
 		Id:       1,
 		TypeData: "healthCheck",
 		Attributes: map[string]any{
-			"environment": app.config.env,
+			"environment": app.config.Env,
 			"version":     version,
 			"status":      "available",
 		},

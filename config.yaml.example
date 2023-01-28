@@ -1,0 +1,25 @@
+port: 4000
+env: "development"
+registration: true
+confirmation: true
+domain: "http://easylist.sergeyem.ru"
+db:
+  host: "127.0.0.1"
+  login: "root"
+  password: ""
+  dbname: "easylist"
+  maxOpenConns: 25
+  maxIdleConns: 25
+  maxIdleTime: "15m"
+smtp:
+  host: "192.168.10.10"
+  port: 1025
+  username: ""
+  password: ""
+  sender: "EasyList Admin <admin@sergeyem.ru>"
+limiter:
+  rps: 2
+  burst: 4
+  enabled: true
+cors:
+  trustedOrigins: ["127.0.0.1"]

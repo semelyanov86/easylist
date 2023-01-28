@@ -138,7 +138,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	}()
 
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if app.config.limiter.enabled {
+		if app.config.Limiter.Enabled {
 			ip, _, err := net.SplitHostPort(request.RemoteAddr)
 			if err != nil {
 				app.serverErrorResponse(writer, request, err)
@@ -147,7 +147,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 			mu.Lock()
 			if _, found := clients[ip]; !found {
-				clients[ip] = &client{limiter: rate.NewLimiter(rate.Limit(app.config.limiter.rps), app.config.limiter.burst)}
+				clients[ip] = &client{limiter: rate.NewLimiter(rate.Limit(app.config.Limiter.Rps), app.config.Limiter.Burst)}
 			}
 
 			clients[ip].lastSeen = time.Now()
@@ -171,8 +171,8 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 		origin := request.Header.Get("Origin")
 
 		if origin != "" {
-			for i := range app.config.cors.trustedOrigins {
-				if origin == app.config.cors.trustedOrigins[i] {
+			for i := range app.config.Cors.TrustedOrigins {
+				if origin == app.config.Cors.TrustedOrigins[i] {
 					writer.Header().Set("Access-Control-Allow-Origin", origin)
 					if request.Method == http.MethodOptions && request.Header.Get("Access-Control-Request-Method") != "" {
 						writer.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, PATCH, DELETE")

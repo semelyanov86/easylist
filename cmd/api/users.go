@@ -11,7 +11,7 @@ import (
 const USERS_TYPE_NAME = "users"
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	if !app.config.registration {
+	if !app.config.Registration {
 		app.methodNotAllowedResponse(w, r)
 		return
 	}
@@ -19,7 +19,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	type attributes struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
-		Password string `json:"password"`
+		Password string `json:"Password"`
 	}
 	type inputAttributes struct {
 		Type       string     `json:"type"`
@@ -43,7 +43,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		IsActive:  true,
 		Version:   1,
 	}
-	if app.config.confirmation {
+	if app.config.Confirmation {
 		user.IsActive = false
 	}
 
@@ -78,7 +78,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if app.config.confirmation {
+	if app.config.Confirmation {
 		token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
@@ -87,7 +87,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.background(func() {
 			var data = map[string]any{
 				"activationToken": token.Plaintext,
-				"domain":          app.config.domain,
+				"Domain":          app.config.Domain,
 			}
 			err = app.mailer.Send(user.Email, "user_welcome.tmpl", data)
 			if err != nil {
