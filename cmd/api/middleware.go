@@ -188,6 +188,11 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 }
 
 func (app *application) metrics(next http.Handler) http.Handler {
+	if !app.config.Statistics {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			httpsnoop.CaptureMetrics(next, writer, request)
+		})
+	}
 	totalRequestReceived := expvar.NewInt("total_request_received")
 	totalResponsesSent := expvar.NewInt("total_responses_sent")
 	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_ms")

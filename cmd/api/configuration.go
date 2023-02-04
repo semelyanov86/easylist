@@ -15,6 +15,7 @@ type config struct {
 	Env          string
 	Registration bool
 	Confirmation bool
+	Statistics   bool
 	Domain       string
 	Db           *database
 	Smtp         *smtp

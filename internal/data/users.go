@@ -199,6 +199,17 @@ func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
+var MockUser = &User{
+	ID:        1,
+	CreatedAt: time.Time{},
+	UpdatedAt: time.Time{},
+	Name:      "Sergey",
+	Email:     "emelyanov86@km.ru",
+	Password:  password{},
+	IsActive:  true,
+	Version:   1,
+}
+
 type MockUserModel struct{}
 
 func (u MockUserModel) Insert(user *User) error {
