@@ -39,12 +39,18 @@ func createTestUserWithToken(t *testing.T, app *application) (*data.User, *data.
 	return user, token, nil
 }
 
-func createTestFolder(app *application, userId int64) (*data.Folder, error) {
+func createTestFolder(app *application, userId int64, name string, order int32) (*data.Folder, error) {
+	if name == "" {
+		name = "Test Folder"
+	}
+	if order == 0 {
+		order = 1
+	}
 	var folder = data.Folder{
-		Name:    "Test Folder",
+		Name:    name,
 		Icon:    "fa-folder",
 		Version: 1,
-		Order:   1,
+		Order:   order,
 		UserId: sql.NullInt64{
 			Int64: userId,
 			Valid: true,
