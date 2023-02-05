@@ -7,13 +7,16 @@ import (
 	"time"
 )
 
-func createTestUserWithToken(t *testing.T, app *application) (*data.User, *data.Token, error) {
+func createTestUserWithToken(t *testing.T, app *application, email string) (*data.User, *data.Token, error) {
+	if email == "" {
+		email = "test@mail.ru"
+	}
 	var token *data.Token
 	var user = &data.User{
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name:      "Test User",
-		Email:     "test@mail.ru",
+		Email:     email,
 		IsActive:  true,
 		Version:   1,
 	}

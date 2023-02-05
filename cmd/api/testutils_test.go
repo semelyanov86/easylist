@@ -4,11 +4,17 @@ import (
 	"database/sql"
 	"easylist/internal/data"
 	"easylist/internal/jsonlog"
+	"github.com/google/jsonapi"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 )
+
+type JsonapiErrors struct {
+	Errors []jsonapi.ErrorObject
+}
 
 func newTestApplication(t *testing.T) *application {
 	return &application{
@@ -112,8 +118,11 @@ func newTestServer(t *testing.T, h http.Handler) *testServer {
 	return &testServer{ts}
 }
 
-func generateRequestWithToken(url, token string) *http.Request {
-	req, _ := http.NewRequest("GET", url, nil)
+func generateRequestWithToken(url, token, method string, body io.Reader) *http.Request {
+	if method == "" {
+		method = "GET"
+	}
+	req, _ := http.NewRequest(method, url, body)
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/vnd.api+json")
 	req.Header.Set("Content-Type", "application/vnd.api+json")

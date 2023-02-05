@@ -43,6 +43,9 @@ To run this project, you will need to add the following environment variables to
 
 `EASYLIST_DB_DSN=root:password@/easylist?parseTime=true`
 
+To have a possibility to run integration tests, you need to set test DB DSN variable:
+`EASYLIST_TEST_DB=root:pass@/easylist_test?parseTime=true&multiStatements=true`
+
 ## Command line arguments
 
 You can run executable script with following arguments:

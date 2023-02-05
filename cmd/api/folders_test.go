@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"easylist/internal/data"
+	"encoding/json"
 	"github.com/google/jsonapi"
+	"io"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -14,12 +17,12 @@ func TestShowDefaultFolder(t *testing.T) {
 	defer teardown()
 
 	ts := newTestServer(t, app.routes())
-	_, token, err := createTestUserWithToken(t, app)
+	_, token, err := createTestUserWithToken(t, app, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer ts.Close()
-	req := generateRequestWithToken(ts.URL+"/api/v1/folders/1", token.Plaintext)
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/1", token.Plaintext, "", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -46,6 +49,9 @@ func TestShowDefaultFolder(t *testing.T) {
 	if check.Icon != "fa-folder" {
 		t.Errorf("want Icon to be fa-folder, got %s", check.Icon)
 	}
+	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
+		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
+	}
 }
 
 func TestShowNewCreatedFolder(t *testing.T) {
@@ -53,7 +59,7 @@ func TestShowNewCreatedFolder(t *testing.T) {
 	defer teardown()
 
 	ts := newTestServer(t, app.routes())
-	user, token, err := createTestUserWithToken(t, app)
+	user, token, err := createTestUserWithToken(t, app, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +68,7 @@ func TestShowNewCreatedFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID)), token.Plaintext)
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID)), token.Plaintext, "", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -91,12 +97,44 @@ func TestShowNewCreatedFolder(t *testing.T) {
 	}
 }
 
+func TestFolderNotFoundAccess(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+	user, token, err := createTestUserWithToken(t, app, "")
+	_, err = createTestFolder(app, user.ID, "", 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []string{
+		"adfad", "4", "-2",
+	}
+
+	for _, tt := range tests {
+		t.Run(tt, func(t *testing.T) {
+			req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+tt, token.Plaintext, "", nil)
+			resp, err := ts.Client().Do(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusNotFound {
+				t.Errorf("want %d status code; got %d", http.StatusNotFound, resp.StatusCode)
+			}
+		})
+	}
+}
+
 func TestIndexFolders(t *testing.T) {
 	app, teardown := newTestAppWithDb(t)
 	defer teardown()
 
 	ts := newTestServer(t, app.routes())
-	user, token, err := createTestUserWithToken(t, app)
+	user, token, err := createTestUserWithToken(t, app, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +147,7 @@ func TestIndexFolders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := generateRequestWithToken(ts.URL+"/api/v1/folders/", token.Plaintext)
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/", token.Plaintext, "", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -134,4 +172,220 @@ func TestIndexFolders(t *testing.T) {
 	if check[2].(*data.Folder).Name != folder2.Name {
 		t.Errorf("want first folder name to be %s, got %s", check[2].(data.Folder).Name, folder2.Name)
 	}
+}
+
+func TestFolderCreationProcess(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	_, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	var folderData = []byte(`{
+	  "data": {
+		"type": "folders",
+		"attributes": {
+		  "name": "New testing folder",
+		  "icon": "fa-some"
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/", token.Plaintext, "POST", bytes.NewBuffer(folderData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("want %d status code; got %d", http.StatusCreated, resp.StatusCode)
+	}
+
+	check := new(data.Folder)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID < 1 {
+		t.Errorf("want correct ID, got %d", check.ID)
+	}
+	if check.Name != "New testing folder" {
+		t.Errorf("want Name to be %s, got %s", "New testing folder", check.Name)
+	}
+	if check.Icon != "fa-some" {
+		t.Errorf("want Icon to be fa-some, got %s", check.Icon)
+	}
+	if check.Order != 1 {
+		t.Errorf("want Order to be 1, got %d", check.Order)
+	}
+	if resp.Header.Get("Location") != "http://127.0.0.1/api/v1/folders/"+strconv.Itoa(int(check.ID)) {
+		t.Errorf("want location header with folders value, got %s", resp.Header.Get("Location"))
+	}
+	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
+		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
+	}
+}
+
+func TestFolderValidation(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+	user, token, err := createTestUserWithToken(t, app, "")
+	_, err = createTestFolder(app, user.ID, "", 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		name    string
+		content string
+	}{
+		{
+			name: "data.attributes.name",
+			content: `{
+			  "data": {
+				"type": "folders",
+				"attributes": {
+				  "name": "",
+				  "icon": "fa-some"
+				}
+			  }
+			}`,
+		},
+		{
+			name: "data.attributes.icon",
+			content: `{
+			  "data": {
+				"type": "folders",
+				"attributes": {
+				  "name": "Some folder",
+				  "icon": "icicic"
+				}
+			  }
+			}`,
+		},
+	}
+
+	var errorData JsonapiErrors
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := generateRequestWithToken(ts.URL+"/api/v1/folders/", token.Plaintext, "POST", bytes.NewBuffer([]byte(tt.content)))
+			resp, err := ts.Client().Do(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusUnprocessableEntity {
+				t.Errorf("want %d status code; got %d", http.StatusUnprocessableEntity, resp.StatusCode)
+			}
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = json.Unmarshal(body, &errorData)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if errorData.Errors[0].Title != "Validation failed for field "+tt.name {
+				t.Errorf("want error title to be %s; got %s", "Validation failed for field", errorData.Errors[0].Title)
+			}
+
+		})
+	}
+}
+
+func TestUpdateFolderProcess(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	folder, err := createTestFolder(app, user.ID, "Adv name", 0)
+
+	var folderData = []byte(`{
+	  "data": {
+		"type": "folders",
+		"attributes": {
+		  "name": "Some new folder name",
+		  "icon": "fa-some-sec",
+		"order": 4
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID)), token.Plaintext, "PATCH", bytes.NewBuffer(folderData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.Folder)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != folder.ID {
+		t.Errorf("want ID to be %d, got %d", folder.ID, check.ID)
+	}
+	if check.Name != "Some new folder name" {
+		t.Errorf("want Name to be %s, got %s", "Some new folder name", check.Name)
+	}
+	if check.Icon != "fa-some-sec" {
+		t.Errorf("want Icon to be %s, got %s", "fa-some-sec", check.Icon)
+	}
+	if check.Order != 4 {
+		t.Errorf("want Order to be 4, got %d", check.Order)
+	}
+	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
+		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
+	}
+}
+
+func TestDeleteFolder(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	folder, err := createTestFolder(app, user.ID, "Adv name", 0)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID)), token.Plaintext, "DELETE", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+
 }
