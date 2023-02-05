@@ -39,14 +39,14 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 }
 
 func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
-	app.writeHeaders(w, status, headers)
+	writeHeaders(w, status, headers)
 	if err := jsonapi.MarshalPayload(w, data); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (app *application) writeHeaders(w http.ResponseWriter, status int, headers http.Header) {
+func writeHeaders(w http.ResponseWriter, status int, headers http.Header) {
 	w.Header().Set("Content-Type", jsonapi.MediaType)
 	for key, value := range headers {
 		w.Header()[key] = value
@@ -54,8 +54,8 @@ func (app *application) writeHeaders(w http.ResponseWriter, status int, headers 
 	w.WriteHeader(status)
 }
 
-func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, data any, metadata data.Metadata, typeData string) error {
-	app.writeHeaders(w, status, nil)
+func writeAndChangeJson[T data.ComplexModels](w http.ResponseWriter, status int, data T, metadata data.Metadata, typeData string, domainName string) error {
+	writeHeaders(w, status, nil)
 	res, err := jsonapi.Marshal(data)
 	if err != nil {
 		return err
@@ -67,10 +67,10 @@ func (app *application) writeAndChangeJson(w http.ResponseWriter, status int, da
 			relationPrefix = metadata.ParentName + "/" + strconv.Itoa(int(metadata.ParentId)) + "/"
 		}
 		manyPayload.Links = &jsonapi.Links{
-			jsonapi.KeyFirstPage:    app.config.Domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.FirstPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
-			jsonapi.KeyPreviousPage: app.config.Domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.PrevPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
-			jsonapi.KeyNextPage:     app.config.Domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.NextPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
-			jsonapi.KeyLastPage:     app.config.Domain + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.LastPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyFirstPage:    domainName + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.FirstPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyPreviousPage: domainName + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.PrevPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyNextPage:     domainName + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.NextPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
+			jsonapi.KeyLastPage:     domainName + "/api/v1/" + relationPrefix + typeData + "?" + jsonapi.QueryParamPageNumber + "=" + strconv.Itoa(metadata.LastPage) + "&" + jsonapi.QueryParamPageSize + "=" + strconv.Itoa(metadata.PageSize),
 		}
 		if metadata.NextPage == 0 {
 			(*manyPayload.Links)[jsonapi.KeyNextPage] = nil
@@ -124,7 +124,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 	return nil
 }
 
-func (app *application) readJsonApi(r *http.Request, dst any) error {
+func readJsonApi[T data.ComplexModel](r *http.Request, dst T) error {
 	return jsonapi.UnmarshalPayload(r.Body, dst)
 }
 

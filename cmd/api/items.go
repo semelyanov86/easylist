@@ -20,7 +20,7 @@ type ItemInput struct {
 
 func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Request) {
 	var item = new(data.Item)
-	if err := app.readJsonApi(r, item); err != nil {
+	if err := readJsonApi(r, item); err != nil {
 		app.badRequestResponse(w, r, "createItemsHandler", err)
 		return
 	}
@@ -97,7 +97,7 @@ func (app *application) indexItemsHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = app.writeAndChangeJson(w, http.StatusOK, items, metadata, data.ItemsType)
+	err = writeAndChangeJson(w, http.StatusOK, items, metadata, data.ItemsType, app.config.Domain)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -175,26 +175,10 @@ func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request
 		}
 		return
 	}
-
-	type attributes struct {
-		ListId       *int64   `json:"list_id"`
-		Name         *string  `json:"name"`
-		Description  *string  `json:"description"`
-		Quantity     *int32   `json:"quantity"`
-		QuantityType *string  `json:"quantity_type"`
-		Price        *float32 `json:"price"`
-		IsStarred    *bool    `json:"is_starred"`
-		File         *string  `json:"file"`
-		Order        *int32   `json:"order"`
-	}
-	type inputAttributes struct {
-		Id         string     `json:"id"`
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
+	var input = Input[ItemAttributes]{Data: InputAttributes[ItemAttributes]{
+		Type:       "tokens",
+		Attributes: ItemAttributes{},
+	}}
 
 	var v = validator.New()
 

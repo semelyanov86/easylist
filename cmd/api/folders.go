@@ -19,7 +19,7 @@ type FolderInput struct {
 
 func (app *application) createFolderHandler(w http.ResponseWriter, r *http.Request) {
 	var folder = new(data.Folder)
-	if err := app.readJsonApi(r, folder); err != nil {
+	if err := readJsonApi(r, folder); err != nil {
 		app.badRequestResponse(w, r, "createFolderHandler", err)
 		return
 	}
@@ -82,7 +82,7 @@ func (app *application) indexFoldersHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.writeAndChangeJson(w, http.StatusOK, folders, metadata, data.FolderType)
+	err = writeAndChangeJson(w, http.StatusOK, folders, metadata, data.FolderType, app.config.Domain)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -146,7 +146,7 @@ func (app *application) updateFolderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	var inputFolder = new(data.Folder)
-	if err := app.readJsonApi(r, inputFolder); err != nil {
+	if err := readJsonApi(r, inputFolder); err != nil {
 		app.badRequestResponse(w, r, "updateFolderHandler", err)
 		return
 	}

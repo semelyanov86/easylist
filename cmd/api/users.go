@@ -16,18 +16,10 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	type attributes struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"Password"`
-	}
-	type inputAttributes struct {
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
+	var input = Input[UserAttributes]{Data: InputAttributes[UserAttributes]{
+		Type:       "tokens",
+		Attributes: UserAttributes{},
+	}}
 
 	var err = app.readJSON(w, r, &input)
 	if err != nil {
@@ -103,16 +95,11 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
-	type attributes struct {
-		Token string `json:"token"`
-	}
-	type inputAttributes struct {
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
+	var input = Input[ActivationAttributes]{Data: InputAttributes[ActivationAttributes]{
+		Type:       "tokens",
+		Attributes: ActivationAttributes{},
+	}}
+
 	var v = validator.New()
 
 	var err = app.readJSON(w, r, &input)

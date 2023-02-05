@@ -20,10 +20,11 @@ type TokenModel struct {
 }
 
 type Token struct {
-	Plaintext string    `json:"token"`
+	ID        int64     `jsonapi:"primary,tokens"`
+	Plaintext string    `jsonapi:"attr,token"`
 	Hash      string    `json:"-"`
 	UserId    int64     `json:"-"`
-	Expiry    time.Time `json:"expiry"`
+	Expiry    time.Time `jsonapi:"attr,expiry"`
 	Scope     string    `json:"-"`
 }
 
@@ -63,7 +64,12 @@ func (t TokenModel) Insert(token *Token) error {
 	var args = []any{token.Hash, token.UserId, token.Expiry, token.Scope}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	_, err := t.DB.ExecContext(ctx, query, args...)
+	result, err := t.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	token.ID = id
 	return err
 }
 

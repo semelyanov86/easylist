@@ -22,7 +22,7 @@ type ListInput struct {
 
 func (app *application) createListsHandler(w http.ResponseWriter, r *http.Request) {
 	var list = new(data.List)
-	if err := app.readJsonApi(r, list); err != nil {
+	if err := readJsonApi(r, list); err != nil {
 		app.badRequestResponse(w, r, "createListsHandler", err)
 		return
 	}
@@ -118,7 +118,7 @@ func (app *application) indexListsHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = app.writeAndChangeJson(w, http.StatusOK, lists, metadata, ListType)
+	err = writeAndChangeJson(w, http.StatusOK, lists, metadata, ListType, app.config.Domain)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -199,7 +199,7 @@ func (app *application) updateListHandler(w http.ResponseWriter, r *http.Request
 	var v = validator.New()
 
 	var inputList = new(data.List)
-	if err := app.readJsonApi(r, inputList); err != nil {
+	if err := readJsonApi(r, inputList); err != nil {
 		app.badRequestResponse(w, r, "updateListHandler", err)
 		return
 	}

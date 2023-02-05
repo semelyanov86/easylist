@@ -76,17 +76,11 @@ import (
 }*/
 
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
-	type attributes struct {
-		Email    string `json:"email"`
-		Password string `json:"Password"`
-	}
-	type inputAttributes struct {
-		Type       string     `json:"type"`
-		Attributes attributes `json:"attributes"`
-	}
-	var input struct {
-		Data inputAttributes `json:"data"`
-	}
+	var input = Input[TokensAttributes]{Data: InputAttributes[TokensAttributes]{
+		Type:       "tokens",
+		Attributes: TokensAttributes{},
+	}}
+
 	var err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, "createAuthenticationTokenHandler", err)
@@ -121,10 +115,7 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusCreated, envelope{
-		TypeData:   "tokens",
-		Attributes: token,
-	}, nil)
+	err = app.writeJSON(w, http.StatusCreated, token, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

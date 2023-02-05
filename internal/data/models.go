@@ -16,6 +16,14 @@ var (
 
 var json = jsontime.ConfigWithCustomTimeFormat
 
+type ComplexModels interface {
+	Folders | Items | Lists
+}
+
+type ComplexModel interface {
+	*Folder | *Item | *List
+}
+
 type Models struct {
 	Users interface {
 		Insert(user *User) error
