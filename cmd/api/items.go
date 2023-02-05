@@ -182,7 +182,7 @@ func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request
 
 	var v = validator.New()
 
-	err = app.readJSON(w, r, &input)
+	err = readJSON(w, r, &input)
 
 	v.Check(input.Data.Type == ItemType, "data.type", "Wrong type provided, accepted type is items")
 	v.Check(input.Data.Id == strconv.FormatInt(id, 10), "data.id", "Passed json id does not match request id")

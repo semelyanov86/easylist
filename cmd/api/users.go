@@ -21,7 +21,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Attributes: UserAttributes{},
 	}}
 
-	var err = app.readJSON(w, r, &input)
+	var err = readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, "registerUserHandler", err)
 		return
@@ -102,7 +102,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 
 	var v = validator.New()
 
-	var err = app.readJSON(w, r, &input)
+	var err = readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, "activateUserHandler", err)
 		return

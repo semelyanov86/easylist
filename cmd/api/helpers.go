@@ -84,7 +84,7 @@ func writeAndChangeJson[T data.ComplexModels](w http.ResponseWriter, status int,
 	return jsonapi.ErrInvalidType
 }
 
-func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+func readJSON[T ComplexInputModels](w http.ResponseWriter, r *http.Request, dst *Input[T]) error {
 	var maxBytes = 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 	var dec = json.NewDecoder(r.Body)

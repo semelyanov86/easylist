@@ -81,7 +81,7 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		Attributes: TokensAttributes{},
 	}}
 
-	var err = app.readJSON(w, r, &input)
+	var err = readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, "createAuthenticationTokenHandler", err)
 		return
