@@ -123,7 +123,9 @@ func generateRequestWithToken(url, token, method string, body io.Reader) *http.R
 		method = "GET"
 	}
 	req, _ := http.NewRequest(method, url, body)
-	req.Header.Set("Authorization", "Bearer "+token)
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 	req.Header.Set("Accept", "application/vnd.api+json")
 	req.Header.Set("Content-Type", "application/vnd.api+json")
 	return req
