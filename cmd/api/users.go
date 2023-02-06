@@ -5,6 +5,7 @@ import (
 	"easylist/internal/validator"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -17,7 +18,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	var input = Input[UserAttributes]{Data: InputAttributes[UserAttributes]{
-		Type:       "tokens",
+		Type:       "users",
 		Attributes: UserAttributes{},
 	}}
 
@@ -144,6 +145,88 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	err = app.writeJSON(w, http.StatusOK, user, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	var userModel = app.contextGetUser(r)
+
+	if id != userModel.ID {
+		app.notPermittedResponse(w, r)
+	}
+
+	var input = Input[UserAttributes]{Data: InputAttributes[UserAttributes]{
+		Type:       "users",
+		Attributes: UserAttributes{},
+	}}
+
+	err = readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, "updateUserHandler", err)
+		return
+	}
+
+	if input.Data.Attributes.Name != "" {
+		userModel.Name = input.Data.Attributes.Name
+	}
+	if input.Data.Attributes.Email != "" {
+		userModel.Email = input.Data.Attributes.Email
+	}
+	if input.Data.Attributes.Password != "" {
+		err = userModel.Password.Set(input.Data.Attributes.Password)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+
+	var v = validator.New()
+
+	v.Check(input.Data.Type == USERS_TYPE_NAME, "data.type", "Wrong type provided, accepted type is users")
+	if data.ValidateUser(v, userModel); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.Users.Update(userModel)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r, "updateUserHandler")
+		case errors.Is(err, data.ErrDuplicateEmail):
+			v.AddError("data.attributes.email", "a user with this email address already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	if r.Header.Get("X-Expected-Version") != "" {
+		if strconv.FormatInt(int64(userModel.Version), 32) != r.Header.Get("X-Expected-Version") {
+			app.editConflictResponse(w, r, "updateUserHandler")
+			return
+		}
+	}
+
+	err = app.writeJSON(w, http.StatusOK, userModel, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) showCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	var userModel = app.contextGetUser(r)
+
+	err := app.writeJSON(w, http.StatusOK, userModel, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
