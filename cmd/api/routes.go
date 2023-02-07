@@ -42,6 +42,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/api/v1/users/:id", app.updateUserHandler)
 	router.HandlerFunc(http.MethodGet, "/api/v1/my", app.showCurrentUserHandler)
 	router.HandlerFunc(http.MethodPut, "/api/v1/users/activated", app.activateUserHandler)
+	router.HandlerFunc(http.MethodDelete, "/api/v1/users/:id", app.deleteUserHandler)
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 

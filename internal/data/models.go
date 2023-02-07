@@ -30,6 +30,7 @@ type Models struct {
 		GetByEmail(email string) (*User, error)
 		Update(user *User) error
 		GetForToken(tokenScope, tokenPlaintext string) (*User, error)
+		Delete(id int64) error
 	}
 	Tokens interface {
 		New(userId int64, ttl time.Duration, scope string) (*Token, error)
@@ -46,6 +47,7 @@ type Models struct {
 		Update(folder *Folder, oldOrder int32) error
 		Delete(id int64, userId int64) error
 		GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error)
+		DeleteByUser(userId int64) error
 	}
 	Lists interface {
 		Insert(list *List) error

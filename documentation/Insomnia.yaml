@@ -1,11 +1,197 @@
 _type: export
 __export_format: 4
-__export_date: 2023-01-26T11:17:15.417Z
+__export_date: 2023-02-07T17:26:52.513Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
+  - _id: req_a7034b84519749babdf8ef7469fd90e5
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1675788496537
+    created: 1675788385068
+    url: "{{ _.URL }}/users/27"
+    name: Delete User
+    description: >-
+      Deleting current user with all data in it. This endpoint completely delete
+      user with folders, lists and etc. Need to pass current authenticated user
+      ID as a param.
+
+
+      Returns 204 no content
+    method: DELETE
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_9b51ffbb06784d3b9db7dc045912d2ef
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_11ce1d4ae597410a9d89b5419a448d38
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1675788385068
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672833886665
+    created: 1672833886665
+    name: Users
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672833886666
+    _type: request_group
+  - _id: wrk_074fff2091894028b24cd3a631beb9fa
+    parentId: null
+    modified: 1672645019681
+    created: 1672645019681
+    name: Easy List
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_c55ad18ab59a4fcbadc64ce562c033b3
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1675788407940
+    created: 1675709244040
+    url: "{{ _.URL }}my"
+    name: Current User
+    description: |-
+      Getting information about current authenticated user. Example response:
+
+      ```json
+      {
+      	"data": {
+      		"type": "users",
+      		"id": "27",
+      		"attributes": {
+      			"created_at": 1673015542,
+      			"email": "emelyanov86@km.ru",
+      			"is_active": true,
+      			"name": "Sergey Emelyanov"
+      		}
+      	}
+      }
+      ```
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_b15c33506d8645c896bc175af3bb6850
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_a7d00c75af684622b03d93bbfb51ea1d
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1675709244040
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_9dfb7960e5ff44beab5ebe15013d7fc2
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1675788392135
+    created: 1675707591430
+    url: "{{ _.URL }}/users/27"
+    name: Update User
+    description: >-
+      Updating current user information. Neet to pass current user id in
+      request. This id should be equal to ID of current auth user. Note, that
+      this request support partly update. You do nt have to pass all fields in
+      request. Example request:
+
+      ```json
+
+      {
+      	"data": {
+      		"type": "users",
+      		"id": "27",
+      		"attributes": {
+      			"created_at": 1673015542,
+      			"email": "emelyanov86@km.ru",
+      			"is_active": true,
+      			"name": "Sergey Emelyanov"
+      		}
+      	}
+      }
+
+      ```
+
+
+      As a result you will get updated object:
+
+
+      ```json
+
+      {
+      	"data": {
+      		"type": "users",
+      		"id": "27",
+      		"attributes": {
+      			"created_at": 1673015542,
+      			"email": "emelyanov86@km.ru",
+      			"is_active": true,
+      			"name": "Sergey Emelyanov",
+      			"updated_at": 1675709095
+      		}
+      	}
+      }
+
+      ```
+    method: PATCH
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+            "type": "users",
+        		"id": "27",
+            "attributes": {
+              "name": "Sergey Emelyanov",
+              "email": "emelyanov86@km.ru",
+        			"password": "1qaz2wsx3edc"
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/vnd.api+json
+        id: pair_72139a89e4ff4b97989132bfc33237fe
+      - id: pair_37772cb4284143b2b19bc88618e21430
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1675707591430
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
   - _id: req_6b0bdf5ec9f34ea99849f7f2e2b8a247
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1673082097151
+    modified: 1675709295966
     created: 1672938508326
     url: "{{ _.URL }}tokens/authentication"
     name: Authentication
@@ -43,31 +229,34 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672833886665
-    created: 1672833886665
-    name: Users
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672833886666
-    _type: request_group
-  - _id: wrk_074fff2091894028b24cd3a631beb9fa
-    parentId: null
-    modified: 1672645019681
-    created: 1672645019681
-    name: Easy List
-    description: ""
-    scope: collection
-    _type: workspace
   - _id: req_97fd2b5ba6b14de3b7015acf58e45848
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1672937404907
+    modified: 1675788338106
     created: 1672918380009
     url: "{{ _.URL }}users/activated"
     name: Activate User
-    description: Activate user with activation token
+    description: >-
+      Activate user with activation token. When you received activation token by
+      email, you will need to pass it via request. After passing token, user
+      will be activated. Note, activation functionality need to be enabled in
+      application config.
+
+
+      Example request:
+
+
+      ```json
+
+      {
+        "data": {
+          "type": "tokens",
+          "attributes": {
+            "token": "ML2HHMJFICLBHNJ3NWD5IOAE2M"
+          }
+        }
+      }
+
+      ```
     method: PUT
     body:
       mimeType: application/json
@@ -102,11 +291,28 @@ resources:
     _type: request
   - _id: req_e1b659979fe94904b50e7c3be717d1fa
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1673014954517
+    modified: 1675788378064
     created: 1672833891583
     url: "{{ _.URL }}users"
     name: Registration
-    description: Register in system under new user account
+    description: >-
+      Register in system under new user account. Note, register functionality
+      needs to be enabled in application config. Example request:
+
+      ```json
+
+      {
+        "data": {
+          "type": "users",
+          "attributes": {
+            "name": "Sergey Emelyanov",
+            "email": "emelyanov86@km.ru",
+      			"password": "1qaz2wsx3edc"
+          }
+        }
+      }
+
+      ```
     method: POST
     body:
       mimeType: application/json
@@ -184,9 +390,9 @@ resources:
     _type: request_group
   - _id: req_8b0eab8f5a3144f591b397e32093a915
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1674391879592
+    modified: 1675700631111
     created: 1673206446152
-    url: "{{ _.URL }}items/10"
+    url: "{{ _.URL }}items/14"
     name: Update Item
     description: >-
       Updating an Item. Example request:
@@ -241,11 +447,11 @@ resources:
       text: |-
         {
           "data": {
-        		"id": "10",
+        		"id": "14",
             "type": "items",
             "attributes": {
-              "name": "Kolbasa doktorskaya",
-              "description": "For olivye sec"
+              "name": "Package of fruits",
+              "description": "For soupe the same"
             }
           }
         }
@@ -273,7 +479,7 @@ resources:
     _type: request
   - _id: req_79e2d0a481954582a7ae5dc81e924087
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1674391876862
+    modified: 1675707641646
     created: 1672668455456
     url: "{{ _.URL }}items/3"
     name: Get Item By Id
@@ -333,7 +539,7 @@ resources:
     _type: request
   - _id: req_18b2d3de6a0d489db7895b5465d21d21
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1674391852656
+    modified: 1675625714142
     created: 1672648901307
     url: "{{ _.URL }}items"
     name: Create new item
@@ -369,19 +575,18 @@ resources:
     method: POST
     body:
       mimeType: application/json
-      text: >-
+      text: |-
         {
           "data": {
             "type": "items",
             "attributes": {
-              "name": "Kolbasa",
-              "description": "For salad",
-        			"quantity": 1,
+              "name": "More products",
+              "description": "For soupe",
+        			"quantity": 6,
         			"quantity_type": "piece",
-        			"price": 12,
+        			"price": 26,
         			"is_starred": false,
-        			"list_id": 3,
-        			"file": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+        			"list_id": 3
             }
           }
         }
@@ -570,7 +775,7 @@ resources:
     _type: request
   - _id: req_708c51a16e4b4e4281c5fc05af364416
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1674731756884
+    modified: 1675622741790
     created: 1674375350438
     url: "{{ _.URL }}items"
     name: Get All Items
@@ -802,7 +1007,7 @@ resources:
     _type: request_group
   - _id: req_ff95b00c61b04a88bf9c27f9277603d0
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1674391917073
+    modified: 1675625722755
     created: 1673168379532
     url: "{{ _.URL }}lists/8"
     name: Update List
@@ -1134,7 +1339,7 @@ resources:
     _type: request
   - _id: req_54a6563c54f34586bd899bc9ca33040f
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1674715525433
+    modified: 1675622730965
     created: 1674374858825
     url: "{{ _.URL }}lists"
     name: Get All Lists
@@ -1284,7 +1489,7 @@ resources:
     _type: request
   - _id: req_583cddfdc8594fc2a8ef1289571fbd4a
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674392185913
+    modified: 1675622668436
     created: 1673099149644
     url: "{{ _.URL }}folders/6"
     name: Delete Folder
@@ -1327,7 +1532,7 @@ resources:
     _type: request_group
   - _id: req_b9f5a7d5d10f41a2b198ed34c3501702
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674411276165
+    modified: 1675598825228
     created: 1673096527868
     url: "{{ _.URL }}folders/10"
     name: Update Folder
@@ -1410,9 +1615,9 @@ resources:
     _type: request
   - _id: req_e5fcde207ebe419dbe75dbcceaf415e4
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674411787936
+    modified: 1675624794534
     created: 1672664839365
-    url: "{{ _.URL }}folders/5"
+    url: "{{ _.URL }}folders/1"
     name: Get Folder By Id
     description: |-
       Retrieve folder by ID from DB.
@@ -1443,7 +1648,7 @@ resources:
         name: include
         value: lists
         description: ""
-        disabled: false
+        disabled: true
     headers:
       - id: pair_e2b5e3a28ed04c35be133bb8ad90e3fb
         name: Accept
@@ -1468,7 +1673,7 @@ resources:
     _type: request
   - _id: req_f15cc6d39d5945a7aa39d3010e36600b
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674411282644
+    modified: 1675598683258
     created: 1672648160352
     url: "{{ _.URL }}folders"
     name: Create New Folder
@@ -1542,7 +1747,7 @@ resources:
     _type: request
   - _id: req_fd86a0c9e0aa49ddad807e9d788a2af4
     parentId: fld_ee3b3f669af141b5b2c8377be2d17f94
-    modified: 1674411283118
+    modified: 1675622690175
     created: 1672647917161
     url: "{{ _.URL }}folders"
     name: Get All Folders
@@ -1686,12 +1891,12 @@ resources:
         name: page[number]
         value: "2"
         description: ""
-        disabled: true
+        disabled: false
       - id: pair_6729ddb734a74423be009c986d95fdf3
         name: page[size]
         value: "2"
         description: ""
-        disabled: true
+        disabled: false
       - id: pair_489c1c84142741d8804e7edbbe99bc72
         name: include
         value: lists
@@ -1792,12 +1997,12 @@ resources:
     _type: request
   - _id: env_92ba6d65fed7fc77b239199e8dafacab6ca5ea23
     parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1673015602679
+    modified: 1675625698249
     created: 1672645019687
     name: Base Environment
     data:
       URL: http://localhost:4000/api/v1/
-      TOKEN: 6PGFAHUMTTYIAVWIXEL2JUUORM
+      TOKEN: NQYPCKGMIFDHAHA4LIWSRXFUCA
     dataPropertyOrder:
       "&":
         - URL

@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"easylist/internal/data"
 	"encoding/json"
+	"errors"
 	"github.com/google/jsonapi"
 	"io"
 	"net/http"
+	"strconv"
 	"testing"
 )
 
@@ -166,5 +168,140 @@ func TestUserValidation(t *testing.T) {
 			}
 
 		})
+	}
+}
+
+func TestUserUpdate(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	var userData = []byte(`{
+	  "data": {
+		"type": "users",
+			"id": "` + strconv.Itoa(int(user.ID)) + `",
+		"attributes": {
+		  "name": "Sergey Emelyanov",
+		  "email": "emelyanov86@km.ru",
+				"password": "SuperPasswordHere"
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/users/"+strconv.Itoa(int(user.ID)), token.Plaintext, "PATCH", bytes.NewBuffer(userData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.User)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != user.ID {
+		t.Errorf("want ID to be %d, got %d", user.ID, check.ID)
+	}
+	if check.Name != "Sergey Emelyanov" {
+		t.Errorf("want Name to be %s, got %s", "Sergey Emelyanov", check.Name)
+	}
+	if check.Email != "emelyanov86@km.ru" {
+		t.Errorf("want Email to be %s, got %s", "emelyanov86@km.ru", check.Email)
+	}
+
+	newUser, err := app.models.Users.GetByEmail("emelyanov86@km.ru")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !newUser.Password.Matches("SuperPasswordHere") {
+		t.Errorf("New password do not match to value SuperPasswordHere")
+	}
+}
+
+func TestShowCurrentUser(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	req := generateRequestWithToken(ts.URL+"/api/v1/my", token.Plaintext, "", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.User)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != user.ID {
+		t.Errorf("want ID to be %d, got %d", user.ID, check.ID)
+	}
+	if check.Name != user.Name {
+		t.Errorf("want name to be %s, got %s", user.Name, check.Name)
+	}
+	if check.Email != user.Email {
+		t.Errorf("want name to be %s, got %s", user.Email, check.Email)
+	}
+}
+
+func TestDeleteUserWithAllContent(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	folder, err := createTestFolder(app, user.ID, "Adv name", 0)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/users/"+strconv.Itoa(int(user.ID)), token.Plaintext, "DELETE", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+	oldUser, err := app.models.Users.GetByEmail(user.Email)
+	if oldUser != nil {
+		t.Errorf("Expected no user, got user with id %d", oldUser.ID)
+	}
+
+	oldFolder, err := app.models.Folders.Get(folder.ID, user.ID)
+	if oldFolder != nil {
+		t.Errorf("Expected no folder, got folder with id %d", oldFolder.ID)
+	}
+	if !errors.Is(err, data.ErrRecordNotFound) {
+		t.Errorf("Expected record not found error, got %s", err.Error())
 	}
 }

@@ -231,3 +231,36 @@ func (app *application) showCurrentUserHandler(w http.ResponseWriter, r *http.Re
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	var userModel = app.contextGetUser(r)
+
+	if userModel.ID != id {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	err = app.models.Folders.DeleteByUser(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.models.Users.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

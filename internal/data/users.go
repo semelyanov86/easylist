@@ -155,6 +155,32 @@ func (u UserModel) Update(user *User) error {
 	return nil
 }
 
+func (u UserModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+
+	var query = "DELETE FROM users WHERE id = ?"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := u.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
+}
+
 func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
 
@@ -226,4 +252,8 @@ func (u MockUserModel) Update(user *User) error {
 
 func (m MockUserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
 	return nil, nil
+}
+
+func (m MockUserModel) Delete(id int64) error {
+	return nil
 }

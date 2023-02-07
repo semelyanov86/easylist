@@ -207,6 +207,23 @@ func (f FolderModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
+func (f FolderModel) DeleteByUser(userId int64) error {
+	if userId < 1 {
+		return ErrRecordNotFound
+	}
+	var query = "DELETE FROM folders WHERE user_id = ?"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := f.DB.ExecContext(ctx, query, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error) {
 	var joinList string
 	var fieldsList string
@@ -356,4 +373,8 @@ func (m MockFolderModel) Delete(id int64, userId int64) error {
 
 func (m MockFolderModel) GetAll(name string, userId int64, filters Filters) (Folders, Metadata, error) {
 	return nil, Metadata{}, nil
+}
+
+func (f MockFolderModel) DeleteByUser(userId int64) error {
+	return nil
 }
