@@ -21,7 +21,7 @@ func createTestUserWithToken(t *testing.T, app *application, email string) (*dat
 		Version:   1,
 	}
 
-	err := user.Password.Set("password")
+	err := user.Password.Set("password123")
 	if err != nil {
 		return user, token, err
 	}
