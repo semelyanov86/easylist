@@ -246,6 +246,14 @@ func (app *application) deleteUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	err = app.models.Items.DeleteByUser(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+	err = app.models.Lists.DeleteByUser(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 	err = app.models.Folders.DeleteByUser(id)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

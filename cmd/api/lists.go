@@ -33,7 +33,7 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	if folderId == 0 {
 		folderId = 1
 	}
-	folderModel, err := app.models.Folders.Get(folderId, userModel.ID)
+	_, err := app.models.Folders.Get(folderId, userModel.ID)
 	var v = validator.New()
 	if err != nil {
 		switch {
@@ -52,7 +52,6 @@ func (app *application) createListsHandler(w http.ResponseWriter, r *http.Reques
 	list.Version = 1
 	list.CreatedAt = time.Now()
 	list.UpdatedAt = time.Now()
-	list.Folder = folderModel
 
 	if data.ValidateList(v, list); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)

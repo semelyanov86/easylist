@@ -55,6 +55,7 @@ type Models struct {
 		GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error)
 		Update(list *List, oldOrder int32) error
 		Delete(id int64, userId int64) error
+		DeleteByUser(userId int64) error
 	}
 	Items interface {
 		Insert(item *Item) error
@@ -62,6 +63,7 @@ type Models struct {
 		Update(item *Item, oldOrder int32) error
 		Delete(id int64, userId int64) error
 		GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error)
+		DeleteByUser(userId int64) error
 	}
 }
 

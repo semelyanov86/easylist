@@ -67,3 +67,29 @@ func createTestFolder(app *application, userId int64, name string, order int32) 
 	}
 	return &folder, nil
 }
+
+func createTestList(app *application, list *data.List) error {
+	if list.Name == "" {
+		list.Name = "Test List"
+	}
+	if list.FolderId == 0 {
+		list.FolderId = 1
+	}
+	if list.Order == 0 {
+		list.Order = 1
+	}
+	if list.Version == 0 {
+		list.Version = 1
+	}
+	if list.Icon == "" {
+		list.Icon = "fa-list"
+	}
+	if list.UserId == 0 {
+		list.UserId = 1
+	}
+	var err = app.models.Lists.Insert(list)
+	if err != nil {
+		return err
+	}
+	return nil
+}

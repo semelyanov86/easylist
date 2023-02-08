@@ -294,6 +294,23 @@ func (l ListModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
+func (l ListModel) DeleteByUser(userId int64) error {
+	if userId < 1 {
+		return ErrRecordNotFound
+	}
+	var query = "DELETE FROM lists WHERE user_id = ?"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := l.DB.ExecContext(ctx, query, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ValidateList(v *validator.Validator, list *List) {
 	v.Check(list.Name != "", "data.attributes.name", "must be provided")
 	v.Check(len(list.Name) <= 190, "data.attributes.name", "must be no more than 190 characters")
@@ -353,4 +370,8 @@ func (m MockListModel) Delete(id int64, userId int64) error {
 
 func (m MockListModel) GetAll(folderId int64, name string, userId int64, filters Filters) (Lists, Metadata, error) {
 	return nil, Metadata{}, nil
+}
+
+func (m MockListModel) DeleteByUser(userId int64) error {
+	return nil
 }

@@ -199,6 +199,23 @@ func (i ItemModel) Delete(id int64, userId int64) error {
 	return nil
 }
 
+func (i ItemModel) DeleteByUser(userId int64) error {
+	if userId < 1 {
+		return ErrRecordNotFound
+	}
+	var query = "DELETE FROM items WHERE user_id = ?"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := i.DB.ExecContext(ctx, query, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error) {
 	var joinList string
 	var fieldsList string
@@ -304,4 +321,8 @@ func (i MockItemModel) Delete(id int64, userId int64) error {
 
 func (i MockItemModel) GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error) {
 	return Items{}, Metadata{}, nil
+}
+
+func (i MockItemModel) DeleteByUser(userId int64) error {
+	return nil
 }
