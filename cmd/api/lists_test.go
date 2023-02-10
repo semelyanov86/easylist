@@ -242,3 +242,75 @@ func TestListValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestListUpdateWithoutPublic(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var list = &data.List{UserId: user.ID, FolderId: folder.ID}
+	err = createTestList(app, list)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var listData = []byte(`{
+	  "data": {
+			"id": "` + strconv.Itoa(int(list.ID)) + `",
+		"type": "lists",
+		"attributes": {
+			"name": "New name",
+			"order": 5,
+			"icon": "fa-new",
+		  "is_public": false
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID)), token.Plaintext, "PATCH", bytes.NewBuffer(listData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.List)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != list.ID {
+		t.Errorf("want ID to be %d, got %d", folder.ID, check.ID)
+	}
+	if check.Name != "New name" {
+		t.Errorf("want Name to be %s, got %s", "New name", check.Name)
+	}
+	if check.Icon != "fa-new" {
+		t.Errorf("want Icon to be %s, got %s", "fa-new", check.Icon)
+	}
+
+	if check.Order != 5 {
+		t.Errorf("want Order to be 5, got %d", check.Order)
+	}
+	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
+		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
+	}
+}
