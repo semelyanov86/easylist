@@ -7,6 +7,7 @@ import (
 	"github.com/google/jsonapi"
 	"io"
 	"net/http"
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -310,7 +311,219 @@ func TestListUpdateWithoutPublic(t *testing.T) {
 	if check.Order != 5 {
 		t.Errorf("want Order to be 5, got %d", check.Order)
 	}
+	if check.Link.Valid {
+		t.Errorf("here should be public link empty")
+	}
 	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
 		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
 	}
+}
+
+func TestMakingListPublic(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var list = &data.List{UserId: user.ID, FolderId: folder.ID}
+	err = createTestList(app, list)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var listData = []byte(`{
+	  "data": {
+			"id": "` + strconv.Itoa(int(list.ID)) + `",
+		"type": "lists",
+		"attributes": {
+		  "is_public": true
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID)), token.Plaintext, "PATCH", bytes.NewBuffer(listData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+	check, err := app.models.Lists.Get(list.ID, user.ID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !check.Link.Valid {
+		t.Errorf("here should be public link NOT empty")
+	}
+	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
+		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
+	}
+}
+
+func TestShowListWithIncludedFolder(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list = data.List{}
+	list.FolderId = folder.ID
+	list.UserId = user.ID
+	err = createTestList(app, &list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID))+"?include=folder", token.Plaintext, "", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.List)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != list.ID {
+		t.Errorf("want ID to equal %d, got %d", list.ID, check.ID)
+	}
+	if check.Folder == nil {
+		t.Errorf("No included folder in response")
+	}
+	if check.Folder.ID != folder.ID {
+		t.Errorf("want folder id to equal %d, got %d", folder.ID, check.Folder.ID)
+	}
+}
+
+func TestIndexAllLists(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list = data.List{}
+	list.FolderId = folder.ID
+	list.UserId = user.ID
+	list.Order = 2
+	err = createTestList(app, &list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list2 = data.List{}
+	list2.FolderId = 1
+	list2.UserId = user.ID
+	list2.Order = 1
+	err = createTestList(app, &list2)
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists?sort=-order", token.Plaintext, "", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(&data.List{}))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check[0].(*data.List).ID != list2.ID {
+		t.Errorf("want first element to be with id %d ; got %d", list2.ID, check[0].(*data.List).ID)
+	}
+	if check[1].(*data.List).ID != list.ID {
+		t.Errorf("want second element to be with id %d ; got %d", list.ID, check[1].(*data.List).ID)
+	}
+}
+
+func TestAllListsFromFolder(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list = data.List{}
+	list.FolderId = folder.ID
+	list.UserId = user.ID
+	list.Order = 2
+	err = createTestList(app, &list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list2 = data.List{}
+	list2.FolderId = 1
+	list2.UserId = user.ID
+	list2.Order = 1
+	err = createTestList(app, &list2)
+	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID))+"/lists", token.Plaintext, "", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(&data.List{}))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(check) > 1 {
+		t.Errorf("want length of lists to be 1; got %d", len(check))
+	}
+	if check[0].(*data.List).ID != list.ID {
+		t.Errorf("want first element to be with id %d ; got %d", list.ID, check[0].(*data.List).ID)
+	}
+
 }
