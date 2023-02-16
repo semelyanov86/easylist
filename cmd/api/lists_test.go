@@ -525,5 +525,33 @@ func TestAllListsFromFolder(t *testing.T) {
 	if check[0].(*data.List).ID != list.ID {
 		t.Errorf("want first element to be with id %d ; got %d", list.ID, check[0].(*data.List).ID)
 	}
+}
 
+func TestDeleteList(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+
+	var list = data.List{}
+	list.FolderId = 1
+	list.UserId = user.ID
+	list.Order = 1
+	err = createTestList(app, &list)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID)), token.Plaintext, "DELETE", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
 }
