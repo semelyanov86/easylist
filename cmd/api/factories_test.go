@@ -93,3 +93,29 @@ func createTestList(app *application, list *data.List) error {
 	}
 	return nil
 }
+
+func createTestItem(app *application, item *data.Item) error {
+	if item.Name == "" {
+		item.Name = "Test Item"
+	}
+	if item.Description == "" {
+		item.Description = "This is test Description"
+	}
+	if item.Quantity == 0 {
+		item.Quantity = 1
+	}
+	if item.QuantityType == "" {
+		item.QuantityType = "st"
+	}
+	if item.Price == 0 {
+		item.Price = 78
+	}
+	if item.Order == 0 {
+		item.Order = 1
+	}
+	var err = app.models.Items.Insert(item)
+	if err != nil {
+		return err
+	}
+	return nil
+}
