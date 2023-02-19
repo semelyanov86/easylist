@@ -17,6 +17,9 @@ func TestAuthorization(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 	user, _, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	folder, err := createTestFolder(app, user.ID, "", 0)
 	if err != nil {
 		t.Fatal(err)
@@ -36,7 +39,12 @@ func TestAuthorization(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 
 			if resp.StatusCode != http.StatusUnauthorized {
 				t.Errorf("want %d status code; got %d", http.StatusUnauthorized, resp.StatusCode)
@@ -52,7 +60,13 @@ func TestNotOwnedRecordAccess(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 	user, _, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, token, err := createTestUserWithToken(t, app, "test2@mail.ru")
 	if err != nil {
@@ -75,7 +89,12 @@ func TestNotOwnedRecordAccess(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
 				t.Fatal(err)

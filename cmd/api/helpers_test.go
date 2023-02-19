@@ -47,7 +47,7 @@ func TestReadIDParam(t *testing.T) {
 	}
 	req = req.WithContext(context.WithValue(req.Context(), httprouter.ParamsKey, params))
 
-	id, err = app.readIDParam(req)
+	id, _ = app.readIDParam(req)
 	if id != 0 {
 		t.Errorf("expected id is 0, but %d", id)
 	}

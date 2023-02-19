@@ -20,12 +20,6 @@ import (
 
 const StoragePath = "storage/"
 
-type envelope struct {
-	Id         int64  `json:"id,omitempty,string"`
-	TypeData   string `json:"type"`
-	Attributes any    `json:"attributes"`
-}
-
 func (app *application) readIDParam(r *http.Request) (int64, error) {
 	var params = httprouter.ParamsFromContext(r.Context())
 	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)

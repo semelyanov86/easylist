@@ -34,7 +34,12 @@ func TestUserRegistration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusCreated {
 		t.Errorf("want %d status code; got %d", http.StatusCreated, resp.StatusCode)
@@ -150,7 +155,12 @@ func TestUserValidation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 
 			if resp.StatusCode != http.StatusUnprocessableEntity {
 				t.Errorf("want %d status code; got %d", http.StatusUnprocessableEntity, resp.StatusCode)
@@ -198,7 +208,12 @@ func TestUserUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -245,7 +260,12 @@ func TestShowCurrentUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -281,18 +301,27 @@ func TestDeleteUserWithAllContent(t *testing.T) {
 	defer ts.Close()
 
 	folder, err := createTestFolder(app, user.ID, "Adv name", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	req := generateRequestWithToken(ts.URL+"/api/v1/users/"+strconv.Itoa(int(user.ID)), token.Plaintext, "DELETE", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
 		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
 	}
-	oldUser, err := app.models.Users.GetByEmail(user.Email)
+	oldUser, _ := app.models.Users.GetByEmail(user.Email)
+
 	if oldUser != nil {
 		t.Errorf("Expected no user, got user with id %d", oldUser.ID)
 	}

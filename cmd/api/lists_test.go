@@ -38,7 +38,12 @@ func TestShowNewCreatedList(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -69,6 +74,9 @@ func TestListNotFoundAccess(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = createTestList(app, &data.List{UserId: user.ID})
 
 	if err != nil {
@@ -85,7 +93,12 @@ func TestListNotFoundAccess(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 
 			if resp.StatusCode != http.StatusNotFound {
 				t.Errorf("want %d status code; got %d", http.StatusNotFound, resp.StatusCode)
@@ -104,6 +117,9 @@ func TestListCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer ts.Close()
 
 	var listData = []byte(`{
@@ -121,7 +137,12 @@ func TestListCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusCreated {
 		t.Errorf("want %d status code; got %d", http.StatusCreated, resp.StatusCode)
@@ -164,6 +185,9 @@ func TestListValidation(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	folder, err := createTestFolder(app, user.ID, "", 0)
 
 	if err != nil {
@@ -223,7 +247,12 @@ func TestListValidation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 
 			if resp.StatusCode != http.StatusUnprocessableEntity {
 				t.Errorf("want %d status code; got %d", http.StatusUnprocessableEntity, resp.StatusCode)
@@ -237,7 +266,7 @@ func TestListValidation(t *testing.T) {
 				t.Fatal(err)
 			}
 			if errorData.Errors[0].Title != "Validation failed for field "+tt.name {
-				t.Errorf("want error title to be %s; got %s", "Validation failed for field", errorData.Errors[0].Title)
+				t.Errorf("want error title to be Validation failed for field %s; got %s", tt.name, errorData.Errors[0].Title)
 			}
 
 		})
@@ -285,7 +314,12 @@ func TestListUpdateWithoutPublic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -357,7 +391,12 @@ func TestMakingListPublic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -401,7 +440,12 @@ func TestShowListWithIncludedFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -452,12 +496,20 @@ func TestIndexAllLists(t *testing.T) {
 	list2.UserId = user.ID
 	list2.Order = 1
 	err = createTestList(app, &list2)
+	if err != nil {
+		t.Fatal(err)
+	}
 	req := generateRequestWithToken(ts.URL+"/api/v1/lists?sort=-order", token.Plaintext, "", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -503,12 +555,20 @@ func TestAllListsFromFolder(t *testing.T) {
 	list2.UserId = user.ID
 	list2.Order = 1
 	err = createTestList(app, &list2)
+	if err != nil {
+		t.Fatal(err)
+	}
 	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID))+"/lists", token.Plaintext, "", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -543,13 +603,21 @@ func TestDeleteList(t *testing.T) {
 	list.UserId = user.ID
 	list.Order = 1
 	err = createTestList(app, &list)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID)), token.Plaintext, "DELETE", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
 		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)

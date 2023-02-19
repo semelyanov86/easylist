@@ -27,7 +27,12 @@ func TestShowDefaultFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -73,7 +78,12 @@ func TestShowNewCreatedFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -104,6 +114,9 @@ func TestFolderNotFoundAccess(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, err = createTestFolder(app, user.ID, "", 0)
 
 	if err != nil {
@@ -120,7 +133,12 @@ func TestFolderNotFoundAccess(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 
 			if resp.StatusCode != http.StatusNotFound {
 				t.Errorf("want %d status code; got %d", http.StatusNotFound, resp.StatusCode)
@@ -152,13 +170,21 @@ func TestIndexFolders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
 	}
 
 	check, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(new(data.Folder)))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(check) != 3 {
 		t.Errorf("want length of folders to equal 3, got %d", len(check))
 	}
@@ -200,7 +226,12 @@ func TestFolderCreationProcess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusCreated {
 		t.Errorf("want %d status code; got %d", http.StatusCreated, resp.StatusCode)
@@ -240,6 +271,9 @@ func TestFolderValidation(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, err = createTestFolder(app, user.ID, "", 0)
 
 	if err != nil {
@@ -284,7 +318,12 @@ func TestFolderValidation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer resp.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}(resp.Body)
 
 			if resp.StatusCode != http.StatusUnprocessableEntity {
 				t.Errorf("want %d status code; got %d", http.StatusUnprocessableEntity, resp.StatusCode)
@@ -317,6 +356,9 @@ func TestUpdateFolderProcess(t *testing.T) {
 	defer ts.Close()
 
 	folder, err := createTestFolder(app, user.ID, "Adv name", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	var folderData = []byte(`{
 	  "data": {
@@ -334,7 +376,12 @@ func TestUpdateFolderProcess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
@@ -376,13 +423,21 @@ func TestDeleteFolder(t *testing.T) {
 	defer ts.Close()
 
 	folder, err := createTestFolder(app, user.ID, "Adv name", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	req := generateRequestWithToken(ts.URL+"/api/v1/folders/"+strconv.Itoa(int(folder.ID)), token.Plaintext, "DELETE", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
 		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
