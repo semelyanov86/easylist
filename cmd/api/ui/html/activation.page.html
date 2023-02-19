@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Activate account</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./static/unsubscribe.css">
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="./static/js/jquery.events.js"></script>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="unsubscribe">
+        <div class="unsubscribe-align"></div>
+        <div id="content" class="unsubscribe-wrapper">
+            <p>
+                To activate your account press the button!</p>
+            <button id="confirm" type="button" class="button button_blue">
+                Activate
+            </button>
+            <p id="result" class="none">
+                Account successfully activated!
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="footer__item">
+        <div class="footer-info">
+            <a href="/" class="footer-developed__logo"></a>
+            <div class="footer-info__content">
+                <div class="footer-info__item">
+                    <a href="/">
+                        Home Page
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+        return false;
+    };
+    $(function () {
+        var token = getUrlParameter('token');
+        $('#confirm').on('click', function (e) {
+            $.ajax({
+                url: '/api/v1/users/activated',
+                dataType: 'json',
+                type: 'PUT',
+                data: JSON.stringify({
+                    "data": {
+                        "type": "tokens",
+                        "attributes": {
+                            "token": token
+                        }
+                    }
+                }),
+                success: function (data) {
+                    if (data.data.id) {
+                        var result = $('#result').removeAttr('class');
+                        $('#content').html(result);
+                    }
+                }
+            });
+            e.preventDefault();
+        });
+    });
+</script>
+</body>
+</html>

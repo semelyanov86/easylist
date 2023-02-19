@@ -58,7 +58,7 @@ func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var headers = make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/api/v1/items/%d", item.ID))
+	headers.Set("Location", fmt.Sprintf("%s/api/v1/items/%d", app.config.Domain, item.ID))
 
 	err = app.writeJSON(w, http.StatusCreated, item, headers)
 
