@@ -16,6 +16,13 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/activate", activation)
 	router.ServeFiles("/static/*filepath", http.Dir("ui/static"))
 
+	fileServer := http.FileServer(http.Dir("./"))
+
+	router.HandlerFunc(http.MethodGet, "/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		fileServer.ServeHTTP(w, r)
+	})
+
 	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", app.healthCheckHandler)
 
 	router.HandlerFunc(http.MethodGet, "/api/v1/folders", app.requirePermission("folders:read", app.indexFoldersHandler))

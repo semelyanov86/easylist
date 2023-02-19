@@ -150,7 +150,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 			clients[ip].lastSeen = time.Now()
 
-			if !clients[ip].limiter.Allow() {
+			if !clients[ip].limiter.Allow() && ip != "127.0.0.1" {
 				mu.Unlock()
 				app.rateLimitExceededResponse(writer, request)
 				return
