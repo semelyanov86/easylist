@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/google/jsonapi"
 	"github.com/google/uuid"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 	"time"
@@ -154,6 +155,51 @@ func (app *application) showListByIdHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 		list.Folder = folderModel
+	}
+	if len(includes) > 0 && data.Contains(includes, "items") {
+		v := validator.New()
+		var input = app.NewItemInput(r, v)
+
+		items, _, err := app.models.Items.GetAll("", userModel.ID, list.ID, false, input.Filters)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		list.Items = items
+	}
+
+	err = app.writeJSON(w, http.StatusOK, list, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) showPublicListHandler(w http.ResponseWriter, r *http.Request) {
+	var params = httprouter.ParamsFromContext(r.Context())
+	var link = params.ByName("link")
+
+	list, err := app.models.Lists.GetPublic(link)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	var qs = r.URL.Query()
+	var includes = app.readCSV(qs, "include", []string{})
+	if len(includes) > 0 && data.Contains(includes, "items") {
+		v := validator.New()
+		var input = app.NewItemInput(r, v)
+
+		items, _, err := app.models.Items.GetAll("", list.UserId, list.ID, false, input.Filters)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		list.Items = items
 	}
 
 	err = app.writeJSON(w, http.StatusOK, list, nil)

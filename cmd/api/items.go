@@ -18,6 +18,19 @@ type ItemInput struct {
 	data.Filters
 }
 
+func (app *application) NewItemInput(r *http.Request, v *validator.Validator) ItemInput {
+	var input ItemInput
+	qs := r.URL.Query()
+	input.Name = app.readString(qs, "filter[name]", "")
+	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
+	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "order")
+	input.Filters.Includes = app.readCSV(qs, "include", []string{})
+
+	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "quantity", "is_starred", "-id", "-name", "-order", "-created_at", "-updated_at", "-quantity", "-is_starred"}
+	return input
+}
+
 func (app *application) createItemsHandler(w http.ResponseWriter, r *http.Request) {
 	var item = new(data.Item)
 	if err := readJsonApi(r, item); err != nil {
@@ -75,16 +88,11 @@ func (app *application) indexItemsHandler(w http.ResponseWriter, r *http.Request
 	}
 	v := validator.New()
 	qs := r.URL.Query()
-	var input ItemInput
-	var userModel = app.contextGetUser(r)
-	input.Name = app.readString(qs, "filter[name]", "")
-	var isStarred = app.readBool(qs, "filter[is_starred]", false, v)
-	input.Filters.Page = app.readInt(qs, jsonapi.QueryParamPageNumber, 1, v)
-	input.Filters.Size = app.readInt(qs, jsonapi.QueryParamPageSize, 20, v)
-	input.Filters.Sort = app.readString(qs, "sort", "order")
-	input.Filters.Includes = app.readCSV(qs, "include", []string{})
 
-	input.Filters.SortSafelist = []string{"id", "name", "order", "created_at", "updated_at", "quantity", "is_starred", "-id", "-name", "-order", "-created_at", "-updated_at", "-quantity", "-is_starred"}
+	var input = app.NewItemInput(r, v)
+
+	var userModel = app.contextGetUser(r)
+	var isStarred = app.readBool(qs, "filter[is_starred]", false, v)
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)

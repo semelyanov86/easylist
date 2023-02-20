@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"easylist/internal/data"
 	"encoding/json"
 	"github.com/google/jsonapi"
@@ -414,7 +415,7 @@ func TestMakingListPublic(t *testing.T) {
 	}
 }
 
-func TestShowListWithIncludedFolder(t *testing.T) {
+func TestShowListWithIncludedFolderAndItems(t *testing.T) {
 	app, teardown := newTestAppWithDb(t)
 	defer teardown()
 
@@ -435,7 +436,16 @@ func TestShowListWithIncludedFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID))+"?include=folder", token.Plaintext, "", nil)
+	var item = data.Item{
+		UserId: user.ID,
+		ListId: list.ID,
+	}
+	err = createTestItem(app, &item)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID))+"?include=folder,items", token.Plaintext, "", nil)
 	resp, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -466,6 +476,9 @@ func TestShowListWithIncludedFolder(t *testing.T) {
 	}
 	if check.Folder.ID != folder.ID {
 		t.Errorf("want folder id to equal %d, got %d", folder.ID, check.Folder.ID)
+	}
+	if len(check.Items) != 1 {
+		t.Errorf("want length of items to be 1, got %d", len(check.Items))
 	}
 }
 
@@ -621,5 +634,64 @@ func TestDeleteList(t *testing.T) {
 
 	if resp.StatusCode != http.StatusNoContent {
 		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+}
+
+func TestShowPublicListWithItems(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, _, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list = data.List{}
+	list.FolderId = folder.ID
+	list.UserId = user.ID
+
+	err = createTestList(app, &list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	list.Link = data.Link{
+		NullString: sql.NullString{String: "111erdde1", Valid: true},
+	}
+	err = app.models.Lists.Update(&list, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var item = data.Item{
+		UserId: user.ID,
+		ListId: list.ID,
+	}
+	err = createTestItem(app, &item)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/links/111erdde1?include=items", "", "", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	if err != nil {
+		t.Error(err)
 	}
 }

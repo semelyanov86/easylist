@@ -56,6 +56,7 @@ type Models struct {
 		Update(list *List, oldOrder int32) error
 		Delete(id int64, userId int64) error
 		DeleteByUser(userId int64) error
+		GetPublic(link string) (*List, error)
 	}
 	Items interface {
 		Insert(item *Item) error

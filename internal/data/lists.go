@@ -223,6 +223,31 @@ func (l ListModel) Get(id int64, userId int64) (*List, error) {
 	return &list, nil
 }
 
+func (l ListModel) GetPublic(link string) (*List, error) {
+	if link == "" {
+		return nil, ErrRecordNotFound
+	}
+
+	var query = "SELECT id, user_id, folder_id, name, icon, version, `order`, link, created_at, updated_at FROM lists WHERE link = ?"
+
+	var list List
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var err = l.DB.QueryRowContext(ctx, query, link).Scan(&list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &list, nil
+}
+
 func (l ListModel) Update(list *List, oldOrder int32) error {
 	var _, err = l.DB.Exec("START TRANSACTION")
 	if err != nil {
@@ -374,4 +399,8 @@ func (m MockListModel) GetAll(folderId int64, name string, userId int64, filters
 
 func (m MockListModel) DeleteByUser(userId int64) error {
 	return nil
+}
+
+func (m MockListModel) GetPublic(link string) (*List, error) {
+	return nil, nil
 }
