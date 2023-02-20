@@ -1,6 +1,6 @@
 _type: export
 __export_format: 4
-__export_date: 2023-02-07T17:26:52.513Z
+__export_date: 2023-02-20T09:47:51.943Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
   - _id: req_a7034b84519749babdf8ef7469fd90e5
@@ -191,7 +191,7 @@ resources:
     _type: request
   - _id: req_6b0bdf5ec9f34ea99849f7f2e2b8a247
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675709295966
+    modified: 1675881078603
     created: 1672938508326
     url: "{{ _.URL }}tokens/authentication"
     name: Authentication
@@ -231,7 +231,7 @@ resources:
     _type: request
   - _id: req_97fd2b5ba6b14de3b7015acf58e45848
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675788338106
+    modified: 1675793524403
     created: 1672918380009
     url: "{{ _.URL }}users/activated"
     name: Activate User
@@ -291,7 +291,7 @@ resources:
     _type: request
   - _id: req_e1b659979fe94904b50e7c3be717d1fa
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675788378064
+    modified: 1675793516527
     created: 1672833891583
     url: "{{ _.URL }}users"
     name: Registration
@@ -390,7 +390,7 @@ resources:
     _type: request_group
   - _id: req_8b0eab8f5a3144f591b397e32093a915
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1675700631111
+    modified: 1676790901747
     created: 1673206446152
     url: "{{ _.URL }}items/14"
     name: Update Item
@@ -479,7 +479,7 @@ resources:
     _type: request
   - _id: req_79e2d0a481954582a7ae5dc81e924087
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1675707641646
+    modified: 1676791302022
     created: 1672668455456
     url: "{{ _.URL }}items/3"
     name: Get Item By Id
@@ -539,7 +539,7 @@ resources:
     _type: request
   - _id: req_18b2d3de6a0d489db7895b5465d21d21
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1675625714142
+    modified: 1676789623675
     created: 1672648901307
     url: "{{ _.URL }}items"
     name: Create new item
@@ -614,7 +614,7 @@ resources:
     _type: request
   - _id: req_744cc286181947d3a84689afa98156ae
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1674391819537
+    modified: 1676815892965
     created: 1672648797363
     url: "{{ _.URL }}lists/3/items"
     name: Get All Items From List
@@ -775,7 +775,7 @@ resources:
     _type: request
   - _id: req_708c51a16e4b4e4281c5fc05af364416
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1675622741790
+    modified: 1676882633086
     created: 1674375350438
     url: "{{ _.URL }}items"
     name: Get All Items
@@ -964,6 +964,49 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
+  - _id: req_551f9268ad0046a090c88af94b2e6e8c
+    parentId: fld_bb5b42a018f7412fae85e39452655f0b
+    modified: 1676883121220
+    created: 1676882975290
+    url: "{{ _.URL }}/links/7379004d-c8f6-4fe3-a96e-8faf36d13d7a"
+    name: Show Public List
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_803dc42f93ee4963adc1d928fa40bb11
+        name: include
+        value: items
+        description: ""
+    headers:
+      - id: pair_21ef498473e9411f8a6d67ddbbd3a6f5
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_9b726c9a2e224787afadc20d476f5330
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1676882975290
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_bb5b42a018f7412fae85e39452655f0b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672648583913
+    created: 1672648583913
+    name: Lists
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672648583913
+    _type: request_group
   - _id: req_d8da19385a664806b00f65637c1e8bb2
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
     modified: 1674391905003
@@ -995,19 +1038,9 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_bb5b42a018f7412fae85e39452655f0b
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672648583913
-    created: 1672648583913
-    name: Lists
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672648583913
-    _type: request_group
   - _id: req_ff95b00c61b04a88bf9c27f9277603d0
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1675625722755
+    modified: 1676310953027
     created: 1673168379532
     url: "{{ _.URL }}lists/8"
     name: Update List
@@ -1067,9 +1100,9 @@ resources:
     _type: request
   - _id: req_6bca7a9caa704b78ba086b79ebe384f4
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1674391961143
+    modified: 1676883848644
     created: 1672667671476
-    url: "{{ _.URL }}lists/2"
+    url: "{{ _.URL }}lists/8"
     name: Get List By Id
     description: |-
       Retrieve list data by id
@@ -1104,9 +1137,9 @@ resources:
     parameters:
       - id: pair_746a4f5c5ea54af3b7bf48b1156afb4e
         name: include
-        value: folder
+        value: folder,items
         description: ""
-        disabled: true
+        disabled: false
     headers:
       - id: pair_36a1163e000349bda92523f1a8e93e3e
         name: Accept
@@ -1130,7 +1163,7 @@ resources:
     _type: request
   - _id: req_ba478905ec2c40019de5569ff733584d
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1674392003567
+    modified: 1676311452165
     created: 1672648687024
     url: "{{ _.URL }}lists"
     name: Create new list
@@ -1160,7 +1193,7 @@ resources:
           "data": {
             "type": "lists",
             "attributes": {
-              "name": "Some technic",
+              "name": "Some technic 333",
               "icon": "fa-list",
         			"folder_id": 8
             }
@@ -1190,7 +1223,7 @@ resources:
     _type: request
   - _id: req_f77d688c59f84db7a7e184a24fd4f1da
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1674392150472
+    modified: 1676745835794
     created: 1672648590768
     url: "{{ _.URL }}folders/5/lists"
     name: Get Lists From Folder
@@ -1339,7 +1372,7 @@ resources:
     _type: request
   - _id: req_54a6563c54f34586bd899bc9ca33040f
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1675622730965
+    modified: 1676311576158
     created: 1674374858825
     url: "{{ _.URL }}lists"
     name: Get All Lists
