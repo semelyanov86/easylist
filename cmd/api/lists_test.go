@@ -68,6 +68,65 @@ func TestShowNewCreatedList(t *testing.T) {
 	}
 }
 
+func TestItemsCountFromList(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, token, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	folder, err := createTestFolder(app, user.ID, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var list = data.List{}
+	list.FolderId = folder.ID
+	list.UserId = user.ID
+	err = createTestList(app, &list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var item = data.Item{}
+	item.ListId = list.ID
+	item.UserId = user.ID
+	err = createTestItem(app, &item)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(list.ID)), token.Plaintext, "", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.List)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != list.ID {
+		t.Errorf("want ID to equal %d, got %d", list.ID, check.ID)
+	}
+	if check.ItemsCount != 1 {
+		t.Errorf("want Items Count to be 1, got %d", check.ItemsCount)
+	}
+}
+
 func TestListNotFoundAccess(t *testing.T) {
 	app, teardown := newTestAppWithDb(t)
 	defer teardown()

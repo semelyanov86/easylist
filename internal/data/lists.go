@@ -12,19 +12,20 @@ import (
 )
 
 type List struct {
-	ID        int64     `jsonapi:"primary,lists"`
-	UserId    int64     `json:"-"`
-	FolderId  int64     `jsonapi:"attr,folder_id"`
-	Name      string    `jsonapi:"attr,name"`
-	Icon      string    `jsonapi:"attr,icon"`
-	Link      Link      `jsonapi:"attr,link"`
-	Order     int32     `jsonapi:"attr,order"`
-	Version   int32     `json:"-"`
-	CreatedAt time.Time `jsonapi:"attr,created_at,iso8601" json:"created_at" time_format:"sql_datetime"`
-	UpdatedAt time.Time `jsonapi:"attr,updated_at,iso8601" json:"updated_at" time_format:"sql_datetime"`
-	IsPublic  bool      `jsonapi:"attr,is_public,omitempty"`
-	Folder    *Folder   `jsonapi:"relation,folder,omitempty"`
-	Items     Items     `jsonapi:"relation,items,omitempty"`
+	ID         int64     `jsonapi:"primary,lists"`
+	UserId     int64     `json:"-"`
+	FolderId   int64     `jsonapi:"attr,folder_id"`
+	Name       string    `jsonapi:"attr,name"`
+	Icon       string    `jsonapi:"attr,icon"`
+	Link       Link      `jsonapi:"attr,link"`
+	Order      int32     `jsonapi:"attr,order"`
+	Version    int32     `json:"-"`
+	ItemsCount int32     `jsonapi:"attr,items_count,omitempty"`
+	CreatedAt  time.Time `jsonapi:"attr,created_at,iso8601" json:"created_at" time_format:"sql_datetime"`
+	UpdatedAt  time.Time `jsonapi:"attr,updated_at,iso8601" json:"updated_at" time_format:"sql_datetime"`
+	IsPublic   bool      `jsonapi:"attr,is_public,omitempty"`
+	Folder     *Folder   `jsonapi:"relation,folder,omitempty"`
+	Items      Items     `jsonapi:"relation,items,omitempty"`
 }
 
 type Lists []*List
@@ -108,7 +109,8 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 		fieldsItems = ", (SELECT CONCAT('[',GROUP_CONCAT(JSON_OBJECT('id', items.id, 'user_id', items.user_id, 'ListId', items.list_id, 'name', items.name, 'description', items.description, 'quantity', items.quantity, 'QuantityType', items.quantity_type, 'price', items.price, 'IsStarred', if(items.is_starred = 1, cast(TRUE as json), cast(FALSE as json)), 'file', items.file, 'version', items.version, 'order', items.order, 'created_at', items.created_at, 'updated_at', items.updated_at)),']')) as parsed_items"
 		groupItems = "GROUP BY lists.id"
 	}
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at%s%s FROM lists %s %s WHERE lists.user_id = ? AND (lists.folder_id = ? OR ? = 0) AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') %s ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, fieldsItems, joinFolder, joinItems, groupItems, filters.sortColumn(), filters.sortDirection())
+
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), lists.id, lists.user_id, lists.folder_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at, (SELECT COUNT(*) FROM items WHERE lists.id = items.list_id) AS items_count%s%s FROM lists %s %s WHERE lists.user_id = ? AND (lists.folder_id = ? OR ? = 0) AND (MATCH(lists.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') %s ORDER BY lists.`%s` %s, lists.`order` ASC LIMIT ? OFFSET ?", fieldsFolder, fieldsItems, joinFolder, joinItems, groupItems, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -129,10 +131,10 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 		var items []Item
 		var parsedItems sql.NullString
 		if len(filters.Includes) == 0 {
-			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &list.ItemsCount)
 		}
 		if Contains(filters.Includes, "folder") && Contains(filters.Includes, "items") {
-			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt, &parsedItems)
+			err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &list.ItemsCount, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt, &parsedItems)
 
 			list.Folder = &folder
 			if err != nil {
@@ -150,11 +152,11 @@ func (l ListModel) GetAll(folderId int64, name string, userId int64, filters Fil
 			}
 		} else {
 			if Contains(filters.Includes, "folder") {
-				err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
+				err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &list.ItemsCount, &folder.ID, &folder.UserId, &folder.Name, &folder.Icon, &folder.Version, &folder.Order, &folder.CreatedAt, &folder.UpdatedAt)
 				list.Folder = &folder
 			}
 			if Contains(filters.Includes, "items") {
-				err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &parsedItems)
+				err = rows.Scan(&totalRecords, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &list.ItemsCount, &parsedItems)
 				if err != nil {
 					return nil, emptyMeta, err
 				}
@@ -203,14 +205,14 @@ func (l ListModel) Get(id int64, userId int64) (*List, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	var query = "SELECT id, user_id, folder_id, name, icon, version, `order`, link, created_at, updated_at FROM lists WHERE id = ? AND user_id = ?"
+	var query = "SELECT id, user_id, folder_id, name, icon, version, `order`, link, created_at, updated_at, (SELECT COUNT(*) FROM items WHERE lists.id = items.list_id) AS items_count FROM lists WHERE id = ? AND user_id = ?"
 
 	var list List
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var err = l.DB.QueryRowContext(ctx, query, id, userId).Scan(&list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+	var err = l.DB.QueryRowContext(ctx, query, id, userId).Scan(&list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt, &list.ItemsCount)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
