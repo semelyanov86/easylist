@@ -378,6 +378,72 @@ func TestUpdateOnlyItemOrder(t *testing.T) {
 	}
 }
 
+func TestMarkingItemDone(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	item, token := createItem(app, t)
+
+	var itemData = []byte(`{
+	  "data": {
+			"id": "` + strconv.Itoa(int(item.ID)) + `",
+		"type": "items",
+		"attributes": {
+				"is_done": true
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/items/"+strconv.Itoa(int(item.ID)), token.Plaintext, "PATCH", bytes.NewBuffer(itemData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.Item)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != item.ID {
+		t.Errorf("want ID to be %d, got %d", item.ID, check.ID)
+	}
+	if check.Name != item.Name {
+		t.Errorf("want Name to be %s, got %s", item.Name, check.Name)
+	}
+	if check.Description != item.Description {
+		t.Errorf("want Description to be %s, got %s", item.Description, check.Description)
+	}
+
+	if check.Price != item.Price {
+		t.Errorf("want Price to be %f, got %f", item.Price, check.Price)
+	}
+	if check.Quantity != item.Quantity {
+		t.Errorf("want Quantity to be %d, got %d", item.Quantity, check.Quantity)
+	}
+	if !check.IsDone {
+		t.Errorf("want IsDone to be true, got %v", check.IsDone)
+	}
+	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
+		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
+	}
+}
+
 func TestShowItemWithIncludedList(t *testing.T) {
 	app, teardown := newTestAppWithDb(t)
 	defer teardown()

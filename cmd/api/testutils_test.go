@@ -75,6 +75,7 @@ func newTestDB(t *testing.T) (*sql.DB, func()) {
 		"../../migrations/000008_add_fulltext_search_to_name_column_in_folders_table.up.sql",
 		"../../migrations/000009_add_fulltext_search_index_to_name_column_in_lists_table.up.sql",
 		"../../migrations/000010_add_fulltext_search_index_to_name_column_in_items_table.up.sql",
+		"../../migrations/000011_add_is_done_column_to_items_table.up.sql",
 	}
 	for _, migration := range migrations {
 		script, err := os.ReadFile(migration)

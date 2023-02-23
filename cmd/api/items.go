@@ -220,6 +220,9 @@ func (app *application) updateItemHandler(w http.ResponseWriter, r *http.Request
 	if input.Data.Attributes.IsStarred != nil {
 		item.IsStarred = *input.Data.Attributes.IsStarred
 	}
+	if input.Data.Attributes.IsDone != nil {
+		item.IsDone = *input.Data.Attributes.IsDone
+	}
 	if input.Data.Attributes.Order != nil {
 		item.Order = *input.Data.Attributes.Order
 	}

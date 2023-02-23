@@ -21,7 +21,7 @@ confirm:
 ## run: run the cmd/api application
 .PHONY: run
 run:
-	go run ./cmd/api -dsn=${EASYLIST_DB_DSN}
+	go run ./cmd/api
 
 ## db: connect to the database using mysql
 .PHONY: db

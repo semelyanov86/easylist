@@ -1,6 +1,6 @@
 _type: export
 __export_format: 4
-__export_date: 2023-02-20T09:47:51.943Z
+__export_date: 2023-02-23T07:58:19.284Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
   - _id: req_a7034b84519749babdf8ef7469fd90e5
@@ -58,7 +58,7 @@ resources:
     _type: workspace
   - _id: req_c55ad18ab59a4fcbadc64ce562c033b3
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675788407940
+    modified: 1677139015770
     created: 1675709244040
     url: "{{ _.URL }}my"
     name: Current User
@@ -191,7 +191,7 @@ resources:
     _type: request
   - _id: req_6b0bdf5ec9f34ea99849f7f2e2b8a247
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675881078603
+    modified: 1677076992313
     created: 1672938508326
     url: "{{ _.URL }}tokens/authentication"
     name: Authentication
@@ -469,6 +469,49 @@ resources:
       type: bearer
       token: "{{ _.TOKEN }}"
     metaSortKey: -1673206446152
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_00b4844adf514afa8d0e618dbe702dac
+    parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
+    modified: 1677139078609
+    created: 1677139029983
+    url: "{{ _.URL }}items/14"
+    name: Mark Item Done
+    description: This is an example request, how you can mark item Done. By just
+      updating one field.
+    method: PATCH
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "data": {
+        		"id": "14",
+            "type": "items",
+            "attributes": {
+              "is_done": true
+            }
+          }
+        }
+    parameters: []
+    headers:
+      - id: pair_b41af71853a34ed9817b4dab7eda9413
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_035c1d2532a94cec9f86177ec03a0fd4
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+    authentication:
+      type: bearer
+      token: "{{ _.TOKEN }}"
+    metaSortKey: -1673187412842
     isPrivate: false
     settingStoreCookies: true
     settingSendCookies: true

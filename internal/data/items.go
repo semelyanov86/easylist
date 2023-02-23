@@ -21,6 +21,7 @@ type Item struct {
 	QuantityType string    `jsonapi:"attr,quantity_type"`
 	Price        float32   `jsonapi:"attr,price"`
 	IsStarred    bool      `jsonapi:"attr,is_starred"`
+	IsDone       bool      `jsonapi:"attr,is_done"`
 	File         string    `jsonapi:"attr,file"`
 	Order        int32     `jsonapi:"attr,order"`
 	Version      int32     `json:"-"`
@@ -89,14 +90,14 @@ func (i ItemModel) Get(id int64, userId int64) (*Item, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	var query = "SELECT id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, created_at, updated_at FROM items WHERE id = ? AND user_id = ?"
+	var query = "SELECT id, user_id, list_id, name, description, quantity, quantity_type, price, is_starred, file, version, `order`, is_done, created_at, updated_at FROM items WHERE id = ? AND user_id = ?"
 
 	var item Item
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var err = i.DB.QueryRowContext(ctx, query, id, userId).Scan(&item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt)
+	var err = i.DB.QueryRowContext(ctx, query, id, userId).Scan(&item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.IsDone, &item.CreatedAt, &item.UpdatedAt)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -114,7 +115,7 @@ func (i ItemModel) Update(item *Item, oldOrder int32) error {
 	if err != nil {
 		return err
 	}
-	var query = "UPDATE items SET list_id = ?, name = ?, description = ?, quantity = ?, quantity_type = ?, price = ?, is_starred = ?, file = ?, `order` = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND user_id = ? AND version = ?"
+	var query = "UPDATE items SET list_id = ?, name = ?, description = ?, quantity = ?, quantity_type = ?, price = ?, is_starred = ?, file = ?, is_done = ?, `order` = ?, version = version + 1, updated_at = NOW() WHERE id = ? AND user_id = ? AND version = ?"
 	var args = []any{
 		item.ListId,
 		item.Name,
@@ -124,6 +125,7 @@ func (i ItemModel) Update(item *Item, oldOrder int32) error {
 		item.Price,
 		item.IsStarred,
 		item.File,
+		item.IsDone,
 		item.Order,
 		item.ID,
 		item.UserId,
@@ -227,7 +229,7 @@ func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred boo
 		joinList = "INNER JOIN lists ON items.list_id = lists.id"
 		fieldsList = ", lists.id, lists.folder_id, lists.user_id, lists.name, lists.icon, lists.version, lists.order, lists.link, lists.created_at, lists.updated_at"
 	}
-	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), items.id, items.user_id, items.list_id, items.name, items.description, items.quantity, items.quantity_type, items.price, items.is_starred, items.file, items.version, items.order, items.created_at, items.updated_at%s FROM items %s WHERE items.user_id = ? AND (items.list_id = ? OR ? = 0) %s AND (MATCH(items.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY items.%s %s, items.order ASC LIMIT ? OFFSET ?", fieldsList, joinList, starredFilter, filters.sortColumn(), filters.sortDirection())
+	var query = fmt.Sprintf("SELECT COUNT(*) OVER(), items.id, items.user_id, items.list_id, items.name, items.description, items.quantity, items.quantity_type, items.price, items.is_starred, items.file, items.version, items.order, items.is_done, items.created_at, items.updated_at%s FROM items %s WHERE items.user_id = ? AND (items.list_id = ? OR ? = 0) %s AND (MATCH(items.name) AGAINST(? IN NATURAL LANGUAGE MODE) OR ? = '') ORDER BY items.%s %s, items.order ASC LIMIT ? OFFSET ?", fieldsList, joinList, starredFilter, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -245,10 +247,10 @@ func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred boo
 		var list List
 		var item Item
 		if Contains(filters.Includes, "list") {
-			err = rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
+			err = rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.IsDone, &item.CreatedAt, &item.UpdatedAt, &list.ID, &list.UserId, &list.FolderId, &list.Name, &list.Icon, &list.Version, &list.Order, &list.Link, &list.CreatedAt, &list.UpdatedAt)
 			item.List = &list
 		} else {
-			err = rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.CreatedAt, &item.UpdatedAt)
+			err = rows.Scan(&totalRecords, &item.ID, &item.UserId, &item.ListId, &item.Name, &item.Description, &item.Quantity, &item.QuantityType, &item.Price, &item.IsStarred, &item.File, &item.Version, &item.Order, &item.IsDone, &item.CreatedAt, &item.UpdatedAt)
 		}
 		if err != nil {
 			return nil, emptyMeta, err

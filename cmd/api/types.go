@@ -21,6 +21,7 @@ type ItemAttributes struct {
 	QuantityType *string  `json:"quantity_type"`
 	Price        *float32 `json:"price"`
 	IsStarred    *bool    `json:"is_starred"`
+	IsDone       *bool    `json:"is_done"`
 	File         *string  `json:"file"`
 	Order        *int32   `json:"order"`
 }
