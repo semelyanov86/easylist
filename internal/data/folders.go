@@ -322,7 +322,7 @@ func (f FolderModel) GetAll(name string, userId int64, filters Filters) (Folders
 func ValidateFolder(v *validator.Validator, folder *Folder) {
 	v.Check(folder.Name != "", "data.attributes.name", "must be provided")
 	v.Check(len(folder.Name) <= 190, "data.attributes.name", "must be no more than 190 characters")
-	v.Check(folder.Icon == "" || strings.HasPrefix(folder.Icon, "fa-"), "data.attributes.icon", "icon must starts with fa- prefix")
+	v.Check(folder.Icon == "" || strings.HasPrefix(folder.Icon, "mdi-"), "data.attributes.icon", "icon must starts with mdi- prefix")
 }
 
 func (folder Folder) JSONAPILinks() *jsonapi.Links {

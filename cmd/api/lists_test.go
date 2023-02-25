@@ -187,7 +187,7 @@ func TestListCreate(t *testing.T) {
 		"type": "lists",
 		"attributes": {
 		  "name": "Some Test List",
-		  "icon": "fa-list",
+		  "icon": "mdi-view-list",
            "folder_id": ` + strconv.Itoa(int(folder.ID)) + `
 		}
 	  }
@@ -221,8 +221,8 @@ func TestListCreate(t *testing.T) {
 	if check.Name != "Some Test List" {
 		t.Errorf("want Name to be %s, got %s", "New testing folder", check.Name)
 	}
-	if check.Icon != "fa-list" {
-		t.Errorf("want Icon to be fa-some, got %s", check.Icon)
+	if check.Icon != "mdi-view-list" {
+		t.Errorf("want Icon to be mdi-view-list, got %s", check.Icon)
 	}
 	if check.Order != 1 {
 		t.Errorf("want Order to be 1, got %d", check.Order)
@@ -264,7 +264,7 @@ func TestListValidation(t *testing.T) {
 		"type": "lists",
 		"attributes": {
 		  "name": "",
-		  "icon": "fa-list",
+		  "icon": "mdi-view-list",
            "folder_id": ` + strconv.Itoa(int(folder.ID)) + `
 		}
 	  }
@@ -363,7 +363,7 @@ func TestListUpdateWithoutPublic(t *testing.T) {
 		"attributes": {
 			"name": "New name",
 			"order": 5,
-			"icon": "fa-new",
+			"icon": "mdi-new",
 		  "is_public": false
 		}
 	  }
@@ -398,8 +398,8 @@ func TestListUpdateWithoutPublic(t *testing.T) {
 	if check.Name != "New name" {
 		t.Errorf("want Name to be %s, got %s", "New name", check.Name)
 	}
-	if check.Icon != "fa-new" {
-		t.Errorf("want Icon to be %s, got %s", "fa-new", check.Icon)
+	if check.Icon != "mdi-new" {
+		t.Errorf("want Icon to be %s, got %s", "mdi-new", check.Icon)
 	}
 
 	if check.Order != 5 {

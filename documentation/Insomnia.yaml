@@ -1098,7 +1098,7 @@ resources:
           "type": "lists",
           "attributes": {
             "name": "Soupe Sec",
-            "icon": "fa-list",
+            "icon": "mdi-view-list",
       			"folder_id": 5,
       			"order": 1,
       			"is_public": false
@@ -1163,7 +1163,7 @@ resources:
       		"attributes": {
       			"created_at": "2023-01-08T08:28:38Z",
       			"folder_id": 5,
-      			"icon": "fa-list",
+      			"icon": "mdi-view-list",
       			"link": "e4081b8c-b865-4573-9dcf-d1631c7fd092",
       			"name": "Kompot Sec",
       			"order": 3,
@@ -1220,7 +1220,7 @@ resources:
           "type": "lists",
           "attributes": {
             "name": "Some technic",
-            "icon": "fa-list",
+            "icon": "mdi-view-list",
       			"folder_id": 8
           }
         }
@@ -1237,7 +1237,7 @@ resources:
             "type": "lists",
             "attributes": {
               "name": "Some technic 333",
-              "icon": "fa-list",
+              "icon": "mdi-view-list",
         			"folder_id": 8
             }
           }
@@ -1314,7 +1314,7 @@ resources:
       			"attributes": {
       				"created_at": "2023-01-08T09:02:17Z",
       				"folder_id": 5,
-      				"icon": "fa-list",
+      				"icon": "mdi-view-list",
       				"link": "c3074054-880a-4a12-8b5e-47c52a9581d0",
       				"name": "Soupe Schi",
       				"order": 1,
@@ -1330,7 +1330,7 @@ resources:
       			"attributes": {
       				"created_at": "2023-01-08T08:28:38Z",
       				"folder_id": 5,
-      				"icon": "fa-list",
+      				"icon": "mdi-view-list",
       				"link": "e4081b8c-b865-4573-9dcf-d1631c7fd092",
       				"name": "Kompot Sec",
       				"order": 3,
@@ -1346,7 +1346,7 @@ resources:
       			"attributes": {
       				"created_at": "2023-01-14T08:55:24Z",
       				"folder_id": 5,
-      				"icon": "fa-list",
+      				"icon": "mdi-view-list",
       				"link": null,
       				"name": "Pure",
       				"order": 4,
@@ -1464,7 +1464,7 @@ resources:
       			"attributes": {
       				"created_at": "2023-01-08T09:02:17Z",
       				"folder_id": 5,
-      				"icon": "fa-list",
+      				"icon": "mdi-view-list",
       				"link": "c3074054-880a-4a12-8b5e-47c52a9581d0",
       				"name": "Soupe Schi",
       				"order": 1,
@@ -1480,7 +1480,7 @@ resources:
       			"attributes": {
       				"created_at": "2023-01-08T08:28:38Z",
       				"folder_id": 5,
-      				"icon": "fa-list",
+      				"icon": "mdi-view-list",
       				"link": "e4081b8c-b865-4573-9dcf-d1631c7fd092",
       				"name": "Kompot Sec",
       				"order": 3,
@@ -1496,7 +1496,7 @@ resources:
       			"attributes": {
       				"created_at": "2023-01-14T08:55:24Z",
       				"folder_id": 5,
-      				"icon": "fa-list",
+      				"icon": "mdi-view-list",
       				"link": null,
       				"name": "Pure",
       				"order": 4,
@@ -1627,7 +1627,7 @@ resources:
           "type": "folders",
           "attributes": {
             "name": "Secondary folder new",
-            "icon": "fa-folder",
+            "icon": "mdi-folder",
       			"order": 2
           }
         }
@@ -1646,7 +1646,7 @@ resources:
       		"type": "folders",
       		"attributes": {
       			"name": "Secondary folder new",
-      			"icon": "fa-folder",
+      			"icon": "mdi-folder",
       			"version": 2,
       			"order": 2
       		}
@@ -1664,7 +1664,7 @@ resources:
             "type": "folders",
             "attributes": {
         			"name": "Super smartphones",
-              "icon": "fa-folder"
+              "icon": "mdi-folder"
             }
           }
         }
@@ -1710,7 +1710,7 @@ resources:
       		"type": "folders",
       		"attributes": {
       			"name": "Some staff",
-      			"icon": "fa-folder",
+      			"icon": "mdi-folder",
       			"version": 1,
       			"order": 4
       		}
@@ -1764,7 +1764,7 @@ resources:
           "type": "folders",
           "attributes": {
             "name": "Some staff",
-            "icon": "fa-folder"
+            "icon": "mdi-folder"
           }
         }
       }
@@ -1779,7 +1779,7 @@ resources:
       		"type": "folders",
       		"attributes": {
       			"name": "Some staff",
-      			"icon": "fa-folder",
+      			"icon": "mdi-folder",
       			"version": 1,
       			"order": 4
       		}
@@ -1795,7 +1795,7 @@ resources:
             "type": "folders",
             "attributes": {
               "name": "Smartphones",
-              "icon": "fa-folder"
+              "icon": "mdi-folder"
             }
           }
         }
@@ -1858,7 +1858,7 @@ resources:
       			"id": "1",
       			"attributes": {
       				"created_at": "2023-01-07T10:16:32Z",
-      				"icon": "fa-folder",
+      				"icon": "mdi-folder",
       				"name": "default",
       				"order": 1,
       				"updated_at": "2023-01-07T10:16:32Z"
@@ -1872,7 +1872,7 @@ resources:
       			"id": "4",
       			"attributes": {
       				"created_at": "2023-01-07T10:23:23Z",
-      				"icon": "fa-folder",
+      				"icon": "mdi-folder",
       				"name": "Secondary folder",
       				"order": 3,
       				"updated_at": "2023-01-07T20:19:11Z"
@@ -1886,7 +1886,7 @@ resources:
       			"id": "5",
       			"attributes": {
       				"created_at": "2023-01-07T10:24:37Z",
-      				"icon": "fa-folder",
+      				"icon": "mdi-folder",
       				"name": "Some New staff",
       				"order": 9,
       				"updated_at": "2023-01-07T14:32:43Z"
@@ -1900,7 +1900,7 @@ resources:
       			"id": "9",
       			"attributes": {
       				"created_at": "2023-01-12T07:57:25Z",
-      				"icon": "fa-folder",
+      				"icon": "mdi-folder",
       				"name": "Additional products for day",
       				"order": 11,
       				"updated_at": "2023-01-12T08:09:22Z"
@@ -1914,7 +1914,7 @@ resources:
       			"id": "8",
       			"attributes": {
       				"created_at": "2023-01-07T20:18:42Z",
-      				"icon": "fa-folder",
+      				"icon": "mdi-folder",
       				"name": "some things",
       				"order": 12,
       				"updated_at": "2023-01-07T20:18:42Z"
@@ -1928,7 +1928,7 @@ resources:
       			"id": "10",
       			"attributes": {
       				"created_at": "2023-01-16T17:28:58Z",
-      				"icon": "fa-folder",
+      				"icon": "mdi-folder",
       				"name": "Super smartphones",
       				"order": 13,
       				"updated_at": "2023-01-16T17:45:04Z"

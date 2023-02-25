@@ -51,8 +51,8 @@ func TestShowDefaultFolder(t *testing.T) {
 	if check.Name != "default" {
 		t.Errorf("want Name to be Test Name, got %s", check.Name)
 	}
-	if check.Icon != "fa-folder" {
-		t.Errorf("want Icon to be fa-folder, got %s", check.Icon)
+	if check.Icon != "mdi-folder" {
+		t.Errorf("want Icon to be mdi-folder, got %s", check.Icon)
 	}
 	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
 		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
@@ -216,7 +216,7 @@ func TestFolderCreationProcess(t *testing.T) {
 		"type": "folders",
 		"attributes": {
 		  "name": "New testing folder",
-		  "icon": "fa-some"
+		  "icon": "mdi-some"
 		}
 	  }
 	}`)
@@ -250,8 +250,8 @@ func TestFolderCreationProcess(t *testing.T) {
 	if check.Name != "New testing folder" {
 		t.Errorf("want Name to be %s, got %s", "New testing folder", check.Name)
 	}
-	if check.Icon != "fa-some" {
-		t.Errorf("want Icon to be fa-some, got %s", check.Icon)
+	if check.Icon != "mdi-some" {
+		t.Errorf("want Icon to be mdi-some, got %s", check.Icon)
 	}
 	if check.Order != 1 {
 		t.Errorf("want Order to be 1, got %d", check.Order)
@@ -290,7 +290,7 @@ func TestFolderValidation(t *testing.T) {
 				"type": "folders",
 				"attributes": {
 				  "name": "",
-				  "icon": "fa-some"
+				  "icon": "mdi-some"
 				}
 			  }
 			}`,
@@ -365,7 +365,7 @@ func TestUpdateFolderProcess(t *testing.T) {
 		"type": "folders",
 		"attributes": {
 		  "name": "Some new folder name",
-		  "icon": "fa-some-sec",
+		  "icon": "mdi-some-sec",
 		"order": 4
 		}
 	  }
@@ -400,8 +400,8 @@ func TestUpdateFolderProcess(t *testing.T) {
 	if check.Name != "Some new folder name" {
 		t.Errorf("want Name to be %s, got %s", "Some new folder name", check.Name)
 	}
-	if check.Icon != "fa-some-sec" {
-		t.Errorf("want Icon to be %s, got %s", "fa-some-sec", check.Icon)
+	if check.Icon != "mdi-some-sec" {
+		t.Errorf("want Icon to be %s, got %s", "mdi-some-sec", check.Icon)
 	}
 	if check.Order != 4 {
 		t.Errorf("want Order to be 4, got %d", check.Order)

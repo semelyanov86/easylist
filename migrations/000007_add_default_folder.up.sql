@@ -1,1 +1,1 @@
-INSERT INTO folders (id, user_id, name, icon, version, `order`, created_at, updated_at) VALUES (1, null, 'default', 'fa-folder', 1, 1, NOW(), NOW())
+INSERT INTO folders (id, user_id, name, icon, version, `order`, created_at, updated_at) VALUES (1, null, 'default', 'mdi-folder', 1, 1, NOW(), NOW())

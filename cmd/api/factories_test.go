@@ -51,7 +51,7 @@ func createTestFolder(app *application, userId int64, name string, order int32) 
 	}
 	var folder = data.Folder{
 		Name:    name,
-		Icon:    "fa-folder",
+		Icon:    "mdi-folder",
 		Version: 1,
 		Order:   order,
 		UserId: sql.NullInt64{
@@ -82,7 +82,7 @@ func createTestList(app *application, list *data.List) error {
 		list.Version = 1
 	}
 	if list.Icon == "" {
-		list.Icon = "fa-list"
+		list.Icon = "mdi-view-list"
 	}
 	if list.UserId == 0 {
 		list.UserId = 1
