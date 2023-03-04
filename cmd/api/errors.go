@@ -75,7 +75,7 @@ func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Reques
 		Title:  "Bad request",
 		Detail: err.Error(),
 	}
-	app.errorResponse(w, r, http.StatusMethodNotAllowed, jsonapi.ErrorsPayload{Errors: []*jsonapi.ErrorObject{&errorObject}})
+	app.errorResponse(w, r, http.StatusBadRequest, jsonapi.ErrorsPayload{Errors: []*jsonapi.ErrorObject{&errorObject}})
 }
 
 func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {

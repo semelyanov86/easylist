@@ -82,7 +82,7 @@ func readJSON[T ComplexInputModels](w http.ResponseWriter, r *http.Request, dst 
 	var maxBytes = 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 	var dec = json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
+	//dec.DisallowUnknownFields()
 	var err = dec.Decode(dst)
 	if err != nil {
 		var syntaxError *json.SyntaxError
