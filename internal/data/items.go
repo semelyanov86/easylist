@@ -268,6 +268,28 @@ func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred boo
 	return items, metadata, nil
 }
 
+func (i ItemModel) MarkAllAsUndone(listId int64, userId int64) error {
+	var query = "UPDATE items SET is_done = false, version = version + 1, updated_at = NOW() WHERE list_id = ? AND user_id = ?"
+	var args = []any{
+		listId,
+		userId,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var _, err2 = i.DB.ExecContext(ctx, query, args...)
+	if err2 != nil {
+		switch {
+		case errors.Is(err2, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err2
+		}
+	}
+	return nil
+}
+
 func (item Item) JSONAPILinks() *jsonapi.Links {
 	return &jsonapi.Links{
 		"self": fmt.Sprintf("%s/api/v1/items/%d", DomainName, item.ID),
@@ -326,5 +348,9 @@ func (i MockItemModel) GetAll(name string, userId int64, listId int64, isStarred
 }
 
 func (i MockItemModel) DeleteByUser(userId int64) error {
+	return nil
+}
+
+func (i MockItemModel) MarkAllAsUndone(listId int64, userId int64) error {
 	return nil
 }

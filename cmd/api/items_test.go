@@ -442,6 +442,22 @@ func TestMarkingItemDone(t *testing.T) {
 	if resp.Header.Get("Content-Type") != "application/vnd.api+json" {
 		t.Errorf("want Content-Type to be application/vnd.api+json, got %s", resp.Header.Get("Content-Type"))
 	}
+
+	req = generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(item.ListId))+"/items/undone", token.Plaintext, "PATCH", nil)
+	resp, err = ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+	newItem, err := app.models.Items.Get(item.ID, item.UserId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if newItem.IsDone {
+		t.Error("Want IsDone attribute to be false, true given")
+	}
 }
 
 func TestShowItemWithIncludedList(t *testing.T) {
