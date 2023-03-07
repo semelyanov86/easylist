@@ -218,6 +218,30 @@ func (i ItemModel) DeleteByUser(userId int64) error {
 	return nil
 }
 
+func (i ItemModel) DeleteFromList(userId int64, listId int64, onlyDone bool) error {
+	if userId < 1 || listId < 1 {
+		return ErrRecordNotFound
+	}
+	var query = "DELETE FROM items WHERE user_id = ? AND list_id = ?"
+	var args = []any{
+		userId, listId,
+	}
+	if onlyDone {
+		query += " AND is_done = ?"
+		args = append(args, onlyDone)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := i.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (i ItemModel) GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error) {
 	var joinList string
 	var fieldsList string
@@ -352,5 +376,9 @@ func (i MockItemModel) DeleteByUser(userId int64) error {
 }
 
 func (i MockItemModel) MarkAllAsUndone(listId int64, userId int64) error {
+	return nil
+}
+
+func (i MockItemModel) DeleteFromList(userId int64, listId int64, onlyDone bool) error {
 	return nil
 }

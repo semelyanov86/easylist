@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestShowCreatedItem(t *testing.T) {
@@ -525,6 +526,104 @@ func TestDeleteItem(t *testing.T) {
 
 	if resp.StatusCode != http.StatusNoContent {
 		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+}
+
+func TestDeleteAllFromList(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	item, token := createItem(app, t)
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(item.ListId))+"/items", token.Plaintext, "DELETE", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+	_, err = app.models.Items.Get(item.ID, item.UserId)
+	if err == nil {
+		t.Error("Expected not found record, got no errors")
+	}
+}
+
+func TestDeleteDoneItemsFromList(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	item, token := createItem(app, t)
+	item2 := data.Item{
+		UserId:       item.UserId,
+		ListId:       item.ListId,
+		Name:         "Second Test Item",
+		Description:  "Test Description",
+		Quantity:     1,
+		QuantityType: "piece",
+		Price:        111,
+		IsStarred:    false,
+		IsDone:       false,
+		File:         "",
+		Order:        2,
+		Version:      0,
+		CreatedAt:    time.Time{},
+		UpdatedAt:    time.Time{},
+	}
+	err := app.models.Items.Insert(&item2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var itemData = []byte(`{
+	  "data": {
+			"id": "` + strconv.Itoa(int(item.ID)) + `",
+		"type": "items",
+		"attributes": {
+				"is_done": true
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/items/"+strconv.Itoa(int(item.ID)), token.Plaintext, "PATCH", bytes.NewBuffer(itemData))
+	_, err = ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req = generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(item.ListId))+"/items/done", token.Plaintext, "DELETE", nil)
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+	_, err = app.models.Items.Get(item2.ID, item2.UserId)
+	if err != nil {
+		t.Error("Expected to find not done item, got error")
+	}
+
+	_, err = app.models.Items.Get(item.ID, item.UserId)
+	if err == nil {
+		t.Error("Expected not found record, got no errors")
 	}
 }
 

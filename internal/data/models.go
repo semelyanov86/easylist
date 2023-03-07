@@ -66,6 +66,7 @@ type Models struct {
 		GetAll(name string, userId int64, listId int64, isStarred bool, filters Filters) (Items, Metadata, error)
 		DeleteByUser(userId int64) error
 		MarkAllAsUndone(listId int64, userId int64) error
+		DeleteFromList(userId int64, listId int64, onlyDone bool) error
 	}
 }
 

@@ -48,6 +48,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/api/v1/items/:id", app.requirePermission("items:write", app.updateItemHandler))
 	router.HandlerFunc(http.MethodDelete, "/api/v1/items/:id", app.requirePermission("items:write", app.deleteItemHandler))
 	router.HandlerFunc(http.MethodPatch, "/api/v1/lists/:id/items/undone", app.requirePermission("items:write", app.uncrossAllItems))
+	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:id/items", app.requirePermission("items:write", app.deleteAllItemsFromListHandler))
+	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:id/items/done", app.requirePermission("items:write", app.deleteDoneItemsFromListHandler))
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPatch, "/api/v1/users/:id", app.updateUserHandler)
