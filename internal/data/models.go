@@ -21,7 +21,12 @@ type ComplexModels interface {
 }
 
 type ComplexModel interface {
-	*Folder | *Item | *List
+	*Folder | *Item | *List | *EmailInput
+}
+
+type EmailInput struct {
+	ID    int64  `jsonapi:"primary,emails"`
+	Email string `jsonapi:"attr,email"`
 }
 
 type Models struct {

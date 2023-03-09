@@ -21,6 +21,14 @@ type ListInput struct {
 	data.Filters
 }
 
+type EmailData struct {
+	Items  data.Items
+	List   *data.List
+	User   *data.User
+	Logo   string
+	Domain string
+}
+
 func (app *application) createListsHandler(w http.ResponseWriter, r *http.Request) {
 	var list = new(data.List)
 	if err := readJsonApi(r, list); err != nil {
@@ -172,6 +180,55 @@ func (app *application) showListByIdHandler(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func (app *application) sendListByEmail(w http.ResponseWriter, r *http.Request) {
+	var emailList EmailData
+	emailList.Logo = "https://sergeyem.ru/img/easylist-logo.png"
+	emailList.Domain = app.config.Domain
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	var userModel = app.contextGetUser(r)
+	emailList.User = userModel
+
+	var emailInput = new(data.EmailInput)
+	if err := readJsonApi(r, emailInput); err != nil {
+		app.badRequestResponse(w, r, "sendListByEmail", err)
+		return
+	}
+
+	list, err := app.models.Lists.Get(id, userModel.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	emailList.List = list
+
+	v := validator.New()
+	var input = app.NewItemInput(r, v)
+	input.Filters.Size = 100
+	items, _, err := app.models.Items.GetAll("", userModel.ID, id, false, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	emailList.Items = items
+	app.background(func() {
+		err = app.mailer.Send(emailInput.Email, "list_email.tmpl", emailList)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+	})
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (app *application) showPublicListHandler(w http.ResponseWriter, r *http.Request) {
