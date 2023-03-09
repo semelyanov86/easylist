@@ -14,6 +14,7 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/", home)
 	router.HandlerFunc(http.MethodGet, "/activate", activation)
+	router.HandlerFunc(http.MethodGet, "/public/:id", app.publicList)
 	router.ServeFiles("/static/*filepath", http.Dir("ui/static"))
 	router.ServeFiles("/storage/*filepath", http.Dir("storage"))
 

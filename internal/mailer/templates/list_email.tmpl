@@ -1,5 +1,5 @@
+{{- /*gotype: easylist/cmd/api.EmailData*/ -}}
 {{define "subject"}}{{.List.Name}} (vie EasyList){{end}}
-
 {{define "plainBody"}}
 Hi,
 This is EasyList items sender
@@ -13,7 +13,6 @@ This is EasyList items sender
 
 {{define "htmlBody"}}
 <!DOCTYPE html>
-{{- /*gotype: EmailData*/ -}}
 <html xmlns="https://www.w3.org/1999/xhtml" style="min-height: 100%; background-color: #fff !important;">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">

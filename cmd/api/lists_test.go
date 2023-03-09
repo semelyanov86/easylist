@@ -754,3 +754,36 @@ func TestShowPublicListWithItems(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestSendingEmailWithListRoute(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	item, token := createItem(app, t)
+	var emailData = []byte(`{
+	  "data": {
+		"type": "emails",
+		"attributes": {
+		  "email": "emelyanov86@km.ru"
+		}
+	  }
+	}`)
+	req := generateRequestWithToken(ts.URL+"/api/v1/lists/"+strconv.Itoa(int(item.ListId))+"/email", token.Plaintext, "POST", bytes.NewBuffer(emailData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("want %d status code; got %d", http.StatusNoContent, resp.StatusCode)
+	}
+}
