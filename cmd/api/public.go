@@ -5,7 +5,6 @@ import (
 	"easylist/internal/validator"
 	"errors"
 	"github.com/julienschmidt/httprouter"
-	"github.com/octoper/go-ray"
 	"log"
 	"net/http"
 	"text/template"
@@ -16,7 +15,6 @@ func (app *application) publicList(w http.ResponseWriter, r *http.Request) {
 	var emailData EmailData
 	link := params.ByName("id")
 	listModel, err := app.models.Lists.GetPublic(link)
-	ray.Ray(listModel)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
