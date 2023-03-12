@@ -364,7 +364,7 @@ func TestListUpdateWithoutPublic(t *testing.T) {
 			"name": "New name",
 			"order": 5,
 			"icon": "mdi-new",
-		  "is_public": false
+		  "is_public": 1
 		}
 	  }
 	}`)
@@ -441,7 +441,7 @@ func TestMakingListPublic(t *testing.T) {
 			"id": "` + strconv.Itoa(int(list.ID)) + `",
 		"type": "lists",
 		"attributes": {
-		  "is_public": true
+		  "is_public": 2
 		}
 	  }
 	}`)

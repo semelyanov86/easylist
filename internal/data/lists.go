@@ -23,7 +23,7 @@ type List struct {
 	ItemsCount int32     `jsonapi:"attr,items_count,omitempty"`
 	CreatedAt  time.Time `jsonapi:"attr,created_at,iso8601" json:"created_at" time_format:"sql_datetime"`
 	UpdatedAt  time.Time `jsonapi:"attr,updated_at,iso8601" json:"updated_at" time_format:"sql_datetime"`
-	IsPublic   bool      `jsonapi:"attr,is_public,omitempty"`
+	IsPublic   int       `jsonapi:"attr,is_public,omitempty"`
 	Folder     *Folder   `jsonapi:"relation,folder,omitempty"`
 	Items      Items     `jsonapi:"relation,items,omitempty"`
 }

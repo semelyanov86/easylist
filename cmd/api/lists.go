@@ -319,11 +319,20 @@ func (app *application) updateListHandler(w http.ResponseWriter, r *http.Request
 		list.FolderId = inputList.FolderId
 	}
 
-	if inputList.IsPublic && !list.Link.Valid {
+	if inputList.IsPublic == 2 && !list.Link.Valid {
 		list.Link = data.Link{
 			NullString: sql.NullString{
 				String: uuid.NewString(),
 				Valid:  true,
+			},
+		}
+	}
+
+	if inputList.IsPublic == 1 && list.Link.Valid {
+		list.Link = data.Link{
+			NullString: sql.NullString{
+				String: "",
+				Valid:  false,
 			},
 		}
 	}

@@ -1,6 +1,6 @@
 _type: export
 __export_format: 4
-__export_date: 2023-03-09T18:09:50.792Z
+__export_date: 2023-03-12T14:01:17.125Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
   - _id: req_a7034b84519749babdf8ef7469fd90e5
@@ -349,7 +349,7 @@ resources:
     _type: request
   - _id: req_325b5635ec5c46649ad4ca485a6b1b83
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1678211863336
+    modified: 1678518014392
     created: 1678129088730
     url: "{{ _.URL }}lists/3/items/undone"
     name: Uncross All In List
@@ -511,7 +511,7 @@ resources:
     _type: request
   - _id: req_00b4844adf514afa8d0e618dbe702dac
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1678214005287
+    modified: 1678471351580
     created: 1677139029983
     url: "{{ _.URL }}items/1"
     name: Mark Item Done
@@ -850,7 +850,7 @@ resources:
     _type: request
   - _id: req_d6ea2e61d30f4a47846ea43ffed011b2
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1678212884041
+    modified: 1678518131847
     created: 1678129260754
     url: "{{ _.URL }}lists/3/items"
     name: Delete All Items From List
@@ -882,7 +882,7 @@ resources:
     _type: request
   - _id: req_11b0c3f6f9434829b7e160f12f072d48
     parentId: fld_3172ac5b333c4a038cb8e4a3dcf216cf
-    modified: 1678258340545
+    modified: 1678518023147
     created: 1678129317614
     url: "{{ _.URL }}lists/3/items/done"
     name: Delete Done Items From List
@@ -1179,7 +1179,7 @@ resources:
     _type: request
   - _id: req_ff95b00c61b04a88bf9c27f9277603d0
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1677652873689
+    modified: 1678629662260
     created: 1673168379532
     url: "{{ _.URL }}lists/11"
     name: Update List
@@ -1197,11 +1197,15 @@ resources:
             "icon": "fa-list",
       			"folder_id": 5,
       			"order": 1,
-      			"is_public": false
+      			"is_public": 2
           }
         }
       }
       ```
+
+      is_public field accept:
+      * 1 - non-public
+      * 2 - public
     method: PATCH
     body:
       mimeType: application/json
@@ -1211,14 +1215,9 @@ resources:
         		"type": "lists",
         		"id": "11",
         		"attributes": {
-        			"name": "Some important staff",
-        			"icon": "mdi-view-list",
-        			"order": 12,
-        			"created_at": "2023-02-24T17:05:41.000Z",
-        			"updated_at": "2023-02-26T13:08:57.000Z",
-        			"folder_id": 11,
-        			"link": null,
-        			"items_count": 0
+        			"name": "New name",
+        			"order": 5,
+        			"icon": "mdi-new"
         		}
         	}
         }
@@ -1246,7 +1245,7 @@ resources:
     _type: request
   - _id: req_6bca7a9caa704b78ba086b79ebe384f4
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1678129500413
+    modified: 1678629293840
     created: 1672667671476
     url: "{{ _.URL }}lists/3"
     name: Get List By Id
@@ -1309,7 +1308,7 @@ resources:
     _type: request
   - _id: req_d9edc6d9f72d48f4a3900f420af0ca46
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1678382207580
+    modified: 1678557876598
     created: 1678129631228
     url: "{{ _.URL }}lists/3/email"
     name: Send List By Email
@@ -1350,7 +1349,7 @@ resources:
     _type: request
   - _id: req_ba478905ec2c40019de5569ff733584d
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1678129699980
+    modified: 1678629659872
     created: 1672648687024
     url: "{{ _.URL }}lists"
     name: Create new list
