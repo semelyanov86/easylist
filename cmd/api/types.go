@@ -10,7 +10,7 @@ type Input[T ComplexInputModels] struct {
 }
 
 type ComplexInputModels interface {
-	TokensAttributes | ItemAttributes | UserAttributes | ActivationAttributes
+	TokensAttributes | ItemAttributes | UserAttributes | ActivationAttributes | ResetPasswordAttributes
 }
 
 type ItemAttributes struct {
@@ -34,6 +34,11 @@ type UserAttributes struct {
 
 type ActivationAttributes struct {
 	Token string `json:"token"`
+}
+
+type ResetPasswordAttributes struct {
+	Token    string `json:"token"`
+	Password string `json:"password"`
 }
 
 type TokensAttributes struct {

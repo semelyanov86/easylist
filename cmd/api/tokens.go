@@ -120,3 +120,63 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) createPasswordResetTokenHandler(w http.ResponseWriter, r *http.Request) {
+	var input = Input[TokensAttributes]{Data: InputAttributes[TokensAttributes]{
+		Type:       "tokens",
+		Attributes: TokensAttributes{},
+	}}
+
+	err := readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, "createPasswordResetTokenHandler", err)
+		return
+	}
+
+	v := validator.New()
+	v.Check(input.Data.Type == "tokens", "data.type", "Wrong type provided, accepted type is tokens")
+	data.ValidateEmail(v, input.Data.Attributes.Email)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user, err := app.models.Users.GetByEmail(input.Data.Attributes.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("email", "no matching email address found")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	if !user.IsActive {
+		v.AddError("email", "user account must be activated")
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	token, err := app.models.Tokens.New(user.ID, 45*time.Minute, data.ScopePasswordReset)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.background(func() {
+		data := map[string]interface{}{
+			"passwordResetToken": token.Plaintext,
+			"domain":             app.config.Domain,
+		}
+
+		err = app.mailer.Send(user.Email, "token_password_reset.tmpl", data)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+	})
+
+	w.WriteHeader(http.StatusNoContent)
+}

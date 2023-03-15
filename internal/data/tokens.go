@@ -14,6 +14,7 @@ import (
 
 const ScopeActivation = "activation"
 const ScopeAuthentication = "authentication"
+const ScopePasswordReset = "password-reset"
 
 type TokenModel struct {
 	DB *sql.DB

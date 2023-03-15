@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/", home)
 	router.HandlerFunc(http.MethodGet, "/activate", activation)
 	router.HandlerFunc(http.MethodGet, "/public/:id", app.publicList)
+	router.HandlerFunc(http.MethodGet, "/reset-password", resetPasswordHandler)
 	router.ServeFiles("/static/*filepath", http.Dir("ui/static"))
 	router.ServeFiles("/storage/*filepath", http.Dir("storage"))
 
@@ -57,9 +58,11 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/api/v1/users/:id", app.updateUserHandler)
 	router.HandlerFunc(http.MethodGet, "/api/v1/my", app.showCurrentUserHandler)
 	router.HandlerFunc(http.MethodPut, "/api/v1/users/activated", app.activateUserHandler)
+	router.HandlerFunc(http.MethodPut, "/api/v1/users/password", app.resetUserPasswordHandler)
 	router.HandlerFunc(http.MethodDelete, "/api/v1/users/:id", app.deleteUserHandler)
 
 	router.HandlerFunc(http.MethodPost, "/api/v1/tokens/authentication", app.createAuthenticationTokenHandler)
+	router.HandlerFunc(http.MethodPost, "/api/v1/tokens/password-reset", app.createPasswordResetTokenHandler)
 
 	router.Handler(http.MethodGet, "/api/v1/debug/vars", expvar.Handler())
 

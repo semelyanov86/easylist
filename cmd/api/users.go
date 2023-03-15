@@ -272,3 +272,66 @@ func (app *application) deleteUserHandler(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (app *application) resetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	var input = Input[ResetPasswordAttributes]{Data: InputAttributes[ResetPasswordAttributes]{
+		Type:       "tokens",
+		Attributes: ResetPasswordAttributes{},
+	}}
+
+	err := readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, "resetUserPasswordHandler", err)
+		return
+	}
+
+	v := validator.New()
+
+	data.ValidatePasswordPlaintext(v, input.Data.Attributes.Password)
+	data.ValidateTokenPlaintext(v, input.Data.Attributes.Token)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user, err := app.models.Users.GetForToken(data.ScopePasswordReset, input.Data.Attributes.Token)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("token", "invalid or expired password reset token")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = user.Password.Set(input.Data.Attributes.Password)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.models.Users.Update(user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r, "resetUserPasswordHandler")
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.models.Tokens.DeleteAllForUser(data.ScopePasswordReset, user.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, user, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}

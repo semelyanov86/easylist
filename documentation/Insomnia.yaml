@@ -1,8 +1,137 @@
 _type: export
 __export_format: 4
-__export_date: 2023-03-12T14:01:17.125Z
+__export_date: 2023-03-15T19:10:26.516Z
 __export_source: insomnia.desktop.app:v2022.4.2
 resources:
+  - _id: req_ca960c606fce4db384cc8d9252829927
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1678907408463
+    created: 1678907100729
+    url: "{{ _.URL }}users/password"
+    name: Change Password With Token
+    description: >-
+      Change password after getting token. Returns status 200 with user model.
+      Example request:
+
+      ```json
+
+      {
+      	"data": {
+      		"type": "tokens",
+      		"attributes": {
+      			"token": "Q7V3BY6D6CTY2YOICK4T3TBO5E",
+      			"password": "1qaz2wsx3edc"
+      		}
+      	}
+      }
+
+      ```
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"data": {
+        		"type": "tokens",
+        		"attributes": {
+        			"token": "Q7V3BY6D6CTY2YOICK4T3TBO5E",
+        			"password": "1qaz2wsx3edc"
+        		}
+        	}
+        }
+    parameters: []
+    headers:
+      - id: pair_44cfbb72fd8c4cf8928e935daa0504a2
+        name: Content-Type
+        value: application/vnd.api+json
+        description: ""
+      - id: pair_aca0490834f44a1ebab75973c8848688
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1678907100729
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
+    parentId: wrk_074fff2091894028b24cd3a631beb9fa
+    modified: 1672833886665
+    created: 1672833886665
+    name: Users
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1672833886666
+    _type: request_group
+  - _id: wrk_074fff2091894028b24cd3a631beb9fa
+    parentId: null
+    modified: 1672645019681
+    created: 1672645019681
+    name: Easy List
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_2dcba7f1d6ae4929b7463ec61d759f8e
+    parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
+    modified: 1678907364641
+    created: 1678901103974
+    url: "{{ _.URL }}tokens/password-reset"
+    name: Password Reset
+    description: >-
+      Reset password endpoint. Creates token and sends it via email. Returns
+      No-Content.
+
+      Example request:
+
+      ```json
+
+      {
+      	"data": {
+      		"type": "tokens",
+      		"attributes": {
+      			"email": "emelyanov86@km.ru"
+      		}
+      	}
+      }
+
+      ```
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"data": {
+        		"type": "tokens",
+        		"attributes": {
+        			"email": "emelyanov86@km.ru"
+        		}
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/vnd.api+json
+        id: pair_fd83a720222b42e1bd50bd027b847364
+      - id: pair_7ed8d6d1b7d14a688487b4b4f0c866c5
+        name: Accept
+        value: application/vnd.api+json
+        description: ""
+    authentication: {}
+    metaSortKey: -1678901103974
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
   - _id: req_a7034b84519749babdf8ef7469fd90e5
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
     modified: 1675788496537
@@ -38,27 +167,9 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
-  - _id: fld_a4f00e7b21a449ed99462ff52d320a1b
-    parentId: wrk_074fff2091894028b24cd3a631beb9fa
-    modified: 1672833886665
-    created: 1672833886665
-    name: Users
-    description: ""
-    environment: {}
-    environmentPropertyOrder: null
-    metaSortKey: -1672833886666
-    _type: request_group
-  - _id: wrk_074fff2091894028b24cd3a631beb9fa
-    parentId: null
-    modified: 1672645019681
-    created: 1672645019681
-    name: Easy List
-    description: ""
-    scope: collection
-    _type: workspace
   - _id: req_c55ad18ab59a4fcbadc64ce562c033b3
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1677139015770
+    modified: 1678907245169
     created: 1675709244040
     url: "{{ _.URL }}my"
     name: Current User
@@ -105,7 +216,7 @@ resources:
     _type: request
   - _id: req_9dfb7960e5ff44beab5ebe15013d7fc2
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675788392135
+    modified: 1678907246534
     created: 1675707591430
     url: "{{ _.URL }}/users/27"
     name: Update User
@@ -191,11 +302,28 @@ resources:
     _type: request
   - _id: req_6b0bdf5ec9f34ea99849f7f2e2b8a247
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1677316178200
+    modified: 1678907308359
     created: 1672938508326
     url: "{{ _.URL }}tokens/authentication"
     name: Authentication
-    description: ""
+    description: >-
+      Authorization endpoint. Getting bearer token with login and password.
+      Example response:
+
+      ```json
+
+      {
+      	"data": {
+      		"type": "tokens",
+      		"id": "24",
+      		"attributes": {
+      			"expiry": 1683401690,
+      			"token": "NQYPCKGMIFDHAHA4LIWSRXFUCA"
+      		}
+      	}
+      }
+
+      ```
     method: POST
     body:
       mimeType: application/json
@@ -231,7 +359,7 @@ resources:
     _type: request
   - _id: req_97fd2b5ba6b14de3b7015acf58e45848
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675793524403
+    modified: 1678907257883
     created: 1672918380009
     url: "{{ _.URL }}users/activated"
     name: Activate User
@@ -291,7 +419,7 @@ resources:
     _type: request
   - _id: req_e1b659979fe94904b50e7c3be717d1fa
     parentId: fld_a4f00e7b21a449ed99462ff52d320a1b
-    modified: 1675793516527
+    modified: 1678907259021
     created: 1672833891583
     url: "{{ _.URL }}users"
     name: Registration
@@ -1179,7 +1307,7 @@ resources:
     _type: request
   - _id: req_ff95b00c61b04a88bf9c27f9277603d0
     parentId: fld_bb5b42a018f7412fae85e39452655f0b
-    modified: 1678629662260
+    modified: 1678691793885
     created: 1673168379532
     url: "{{ _.URL }}lists/11"
     name: Update List
@@ -1215,9 +1343,10 @@ resources:
         		"type": "lists",
         		"id": "11",
         		"attributes": {
-        			"name": "New name",
+        			"name": "New name 2",
         			"order": 5,
-        			"icon": "mdi-new"
+        			"icon": "mdi-new",
+        			"is_public": 2
         		}
         	}
         }

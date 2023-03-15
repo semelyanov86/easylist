@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestUserRegistration(t *testing.T) {
@@ -332,5 +333,58 @@ func TestDeleteUserWithAllContent(t *testing.T) {
 	}
 	if !errors.Is(err, data.ErrRecordNotFound) {
 		t.Errorf("Expected record not found error, got %s", err.Error())
+	}
+}
+
+func TestUpdatePasswordWithTokenHandler(t *testing.T) {
+	app, teardown := newTestAppWithDb(t)
+	defer teardown()
+
+	ts := newTestServer(t, app.routes())
+	user, _, err := createTestUserWithToken(t, app, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ts.Close()
+	token, err := app.models.Tokens.New(user.ID, 45*time.Minute, data.ScopePasswordReset)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	var tokenData = []byte(`{
+	  "data": {
+		"type": "tokens",
+		"attributes": {
+		  "token": "` + token.Plaintext + `",
+				"password": "SuperPasswordHere"
+		}
+	  }
+	}`)
+
+	req := generateRequestWithToken(ts.URL+"/api/v1/users/password", "", "PUT", bytes.NewBuffer(tokenData))
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("want %d status code; got %d", http.StatusOK, resp.StatusCode)
+	}
+
+	check := new(data.User)
+
+	err = jsonapi.UnmarshalPayload(resp.Body, check)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check.ID != user.ID {
+		t.Errorf("want ID to be %d, got %d", user.ID, check.ID)
 	}
 }
