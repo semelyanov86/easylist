@@ -72,6 +72,7 @@ func newTestDB(t *testing.T) (*sql.DB, func()) {
 		"../../migrations/000004_create_folders_table.up.sql",
 		"../../migrations/000005_create_lists_table.up.sql",
 		"../../migrations/000006_create_items_table.up.sql",
+		"../../migrations/000007_add_default_folder.up.sql",
 		"../../migrations/000008_add_fulltext_search_to_name_column_in_folders_table.up.sql",
 		"../../migrations/000009_add_fulltext_search_index_to_name_column_in_lists_table.up.sql",
 		"../../migrations/000010_add_fulltext_search_index_to_name_column_in_items_table.up.sql",
