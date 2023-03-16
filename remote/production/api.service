@@ -20,7 +20,7 @@ User=easylist
 Group=easylist
 EnvironmentFile=/etc/environment
 WorkingDirectory=/home/easylist/easylist
-ExecStart=/home/easylist/easylist/api -port=4000 -db-dsn=${EASYLIST_DB_DSN} -env=production
+ExecStart=/home/easylist/easylist/api
 
 # Automatically restart the service after a 5-second wait if it exits with a non-zero
 # exit code. If it restarts more than 5 times in 600 seconds, then the rate limit we
