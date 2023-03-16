@@ -83,25 +83,23 @@ build:
 # PRODUCTION
 # ==================================================================================== #
 
-production_host_ip = "your.ip.address"
+production_host_ip = "serv.sergeyem.ru"
 
 ## production/connect: connect to the production server
 .PHONY: production/connect
 production/connect:
-	ssh root@${production_host_ip}
+	ssh easylist@${production_host_ip}
 
 ## production/deploy/api: deploy the api to production
 .PHONY: production/deploy/api
 production/deploy/api:
-	rsync -P ./bin/linux_amd64/api root@${production_host_ip}:~
-	rsync -rP --delete ./migrations root@${production_host_ip}:~
-	rsync -P ./remote/production/api.service root@${production_host_ip}:~
-	rsync -P ./remote/production/Caddyfile root@${production_host_ip}:~
-	ssh -t root@${production_host_ip} '\
+	rsync -P ./bin/linux_amd64/api easylist@${production_host_ip}:~
+	rsync -rP --delete ./migrations easylist@${production_host_ip}:~
+	rsync -P ./remote/production/api.service easylist@${production_host_ip}:~
+	ssh -t easylist@${production_host_ip} '\
 		migrate -path ~/migrations -database $$EASYLIST_DB_DSN up \
 		&& sudo mv ~/api.service /etc/systemd/system/ \
 		&& sudo systemctl enable api \
 		&& sudo systemctl restart api \
-		&& sudo mv ~/Caddyfile /etc/caddy/ \
-		&& sudo systemctl reload caddy \
+		&& sudo service apache restart \
 	'
