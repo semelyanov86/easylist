@@ -97,9 +97,9 @@ production/deploy/api:
 	rsync -rP --delete ./migrations easylist@${production_host_ip}:~
 	rsync -P ./remote/production/api.service easylist@${production_host_ip}:~
 	ssh -t easylist@${production_host_ip} '\
-		migrate -path ~/migrations -database $$EASYLIST_DB_DSN up \
+		cd ~/easylist && make migrate \
 		&& sudo mv ~/api.service /etc/systemd/system/ \
 		&& sudo systemctl enable api \
 		&& sudo systemctl restart api \
-		&& sudo service apache restart \
+		&& sudo service apache2 restart \
 	'
