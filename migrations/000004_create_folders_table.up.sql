@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS `folders`
     `updated_at` DATETIME                    NOT NULL DEFAULT NOW()
 );
 
-INSERT INTO folders (name) values ('default');
+# INSERT INTO folders (name) values ('default');
