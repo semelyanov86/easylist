@@ -17,7 +17,9 @@ type config struct {
 	Confirmation bool
 	Statistics   bool
 	Domain       string
+	Frontend     string
 	Db           *database
+	AppName      string
 	Smtp         *smtp
 	Limiter      *limiter `yaml:"limiter"`
 	Cors         struct {

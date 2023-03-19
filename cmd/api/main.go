@@ -21,18 +21,7 @@ func main() {
 	var cfg config
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
-	dirname, err := os.UserConfigDir()
-	if err != nil {
-		panic(err)
-	}
-	bytesOut, err := os.ReadFile(dirname + "/easylist.yaml")
-
-	if err != nil {
-		panic(err)
-	}
-	if err := yaml.Unmarshal(bytesOut, &cfg); err != nil {
-		panic(err)
-	}
+	readConfigFile(&cfg)
 	cfg.Db.Dsn = cfg.Db.Login + ":" + cfg.Db.Password + "@" + cfg.Db.Host + "/" + cfg.Db.Dbname + "?parseTime=true"
 	displayVersion := flag.Bool("version", false, "Display version and exit")
 
@@ -79,6 +68,21 @@ func main() {
 		logger.PrintFatal(err, nil)
 	}
 	logger.PrintInfo(fmt.Sprintf("starting %s server on %d", cfg.Env, cfg.Port), nil)
+}
+
+func readConfigFile(cfg *config) {
+	dirname, err := os.UserConfigDir()
+	if err != nil {
+		panic(err)
+	}
+	bytesOut, err := os.ReadFile(dirname + "/easylist.yaml")
+
+	if err != nil {
+		panic(err)
+	}
+	if err := yaml.Unmarshal(bytesOut, &cfg); err != nil {
+		panic(err)
+	}
 }
 
 func openDB(cfg config) (*sql.DB, error) {

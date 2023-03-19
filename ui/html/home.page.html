@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+{{- /*gotype: easylist/cmd/api.config*/ -}}
 <html lang="en" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>EasyList Application</title>
+    <title>{{.AppName}} Application</title>
     <link href="./static/style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Heebo:400,700|IBM+Plex+Sans:600" rel="stylesheet">
     <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
@@ -39,10 +40,10 @@
             <div class="container">
                 <div class="hero-inner">
                     <div class="hero-copy">
-                        <h1 class="hero-title mt-0">EasyList Application</h1>
+                        <h1 class="hero-title mt-0">{{ .AppName }} Application</h1>
                         <p class="hero-paragraph">One app for stress-free shopping, cooking, and meal planning. Self-Hosted and easy to use</p>
                         <div class="hero-cta">
-                            <a class="button button-primary" href="#">Sign In</a>
+                            <a class="button button-primary" href="{{ .Frontend }}">Sign In</a>
                             <div class="lights-toggle">
                                 <input id="lights-toggle" type="checkbox" name="lights-toggle" class="switch"
                                        checked="checked">
@@ -65,10 +66,10 @@
                                  src="./static/img/hero-media-illustration-dark.svg" alt="Hero media illustration">
                         </div>
                         <div class="hero-media-container">
-                            <img class="hero-media-image asset-light" src="./static/img/hero-media-light.svg"
-                                 alt="Hero media">
-                            <img class="hero-media-image asset-dark" src="./static/img/hero-media-dark.svg"
-                                 alt="Hero media">
+                            <img class="hero-media-image asset-light" src="./static/img/easylist1.png"
+                                 alt="Easylist homepage">
+                            <img class="hero-media-image asset-dark" src="./static/img/easylist1.png"
+                                 alt="Easylist Homepage">
                         </div>
                     </div>
                 </div>
@@ -80,19 +81,19 @@
                 <div class="features-inner section-inner has-bottom-divider">
                     <div class="features-header text-center">
                         <div class="container-sm">
-                            <h2 class="section-title mt-0">EasyList Everywhere</h2>
+                            <h2 class="section-title mt-0">{{.AppName}} Everywhere</h2>
                             <p class="section-paragraph">Application available via WEB as well as Android application. EasyList makes shared grocery lists simple and intuitive.</p>
                             <div class="features-image">
                                 <img class="features-illustration asset-dark"
                                      src="./static/img/features-illustration-dark.svg" alt="Feature illustration">
-                                <img class="features-box asset-dark" src="./static/img/features-box-dark.svg"
+                                <img class="features-box asset-dark" src="./static/img/easylist2.png"
                                      alt="Feature box">
                                 <img class="features-illustration asset-dark"
                                      src="./static/img/features-illustration-top-dark.svg"
                                      alt="Feature illustration top">
                                 <img class="features-illustration asset-light"
                                      src="./static/img/features-illustration-light.svg" alt="Feature illustration">
-                                <img class="features-box asset-light" src="./static/img/features-box-light.svg"
+                                <img class="features-box asset-light" src="./static/img/easylist2.png"
                                      alt="Feature box">
                                 <img class="features-illustration asset-light"
                                      src="./static/img/features-illustration-top-light.svg"
@@ -109,7 +110,7 @@
                                 </div>
                                 <div class="feature-content">
                                     <h3 class="feature-title mt-0">QUICKLY CREATE ORGANIZED LISTS</h3>
-                                    <p class="text-sm mb-0">EasyList suggests common items as you type, and automatically groups items by category to help save time at the store.</p>
+                                    <p class="text-sm mb-0">{{ .AppName }} suggests common items as you type, and automatically groups items by category to help save time at the store.</p>
                                 </div>
                             </div>
                         </div>
@@ -169,7 +170,7 @@
                 </div>
                 <ul class="footer-social-links list-reset">
                     <li>
-                        <a href="facebook.com/semelyanov86">
+                        <a href="https://facebook.com/semelyanov86">
                             <span class="screen-reader-text">Facebook</span>
                             <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M6.023 16L6 9H3V6h3V4c0-2.7 1.672-4 4.08-4 1.153 0 2.144.086 2.433.124v2.821h-1.67c-1.31 0-1.563.623-1.563 1.536V6H13l-1 3H9.28v7H6.023z"
