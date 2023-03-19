@@ -19,7 +19,7 @@ type config struct {
 	Domain       string
 	Frontend     string
 	Db           *database
-	AppName      string
+	AppName      string `yaml:"appName"`
 	Smtp         *smtp
 	Limiter      *limiter `yaml:"limiter"`
 	Cors         struct {
